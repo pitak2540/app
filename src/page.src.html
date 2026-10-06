@@ -142,6 +142,7 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
         <label class="f">สัดส่วนตัวอักษรขั้นต่ำ<select id="scRatio"><option value="0.5">50% (ได้เยอะ มีขยะปน)</option><option value="0.7" selected>70%</option><option value="0.85">85% (เข้มงวด)</option></select></label>
         <label class="c"><input type="checkbox" id="scAscii" checked> สแกนเฉพาะอักษรอังกฤษ</label>
         <label class="c"><input type="checkbox" id="scPtr" checked> เฉพาะที่มีพอยน์เตอร์ชี้</label>
+        <label class="c"><input type="checkbox" id="scJunk" checked> ซ่อนข้อความที่ไม่ใช่คำอังกฤษ (ขยะ)</label>
         <label class="c"><input type="checkbox" id="scSwap"> สลับไบต์คู่ (รอมอาร์เคด / Neo Geo / .v64)</label>
         <button class="btn pri" id="btnScan">แกะข้อความ</button>
       </div>
@@ -520,6 +521,9 @@ const G={builtin:new Map(), user:new Map(), mem:new Map(), live:new Map()};
 const VERB=new Set(RS_DICT.verbs.split(' ')), FUNC=new Set('of in on at for from with and or but if is are was were to you i he she we they it this that not'.split(' ')), thSp=t=>t.replace(/([\u0E00-\u0E7F])([A-Za-z0-9])/g,'$1 $2').replace(/([A-Za-z0-9])([\u0E00-\u0E7F])/g,'$1 $2');
 const ADJ=new Set(RS_DICT.adj.split(' ')), POSS=new Set(['my','your','his','her','our','their','its']), ART=new Set(['a','an','the','to','do','does','did','been','be']), BE=new Set(['is','are','am','was','were']);
 const word=k=>G.user.get(k)||($('glBuiltin').checked&&G.builtin.get(k))||'';
+function looksEnglish(text){ const tk=(text.replace(/’/g,"'").match(/[A-Za-z][A-Za-z']*/g)||[]).filter(w=>w.length>=2); if(!tk.length) return false; let known=0;
+  for(const w of tk){ const lw=w.toLowerCase(); if(!(w===lw||w===w.toUpperCase()||w.slice(1)===lw.slice(1))) continue; if(ART.has(lw)||BE.has(lw)||G.builtin.has(lw)||G.user.has(lw)||(lw.length>3&&stem(lw))) known++; }
+  return known>=1&&known/tk.length>=0.34; }
 function stem(w){ const c=[w]; if(w.endsWith("'s")) c.push(w.slice(0,-2)); if(w.endsWith('ies')) c.push(w.slice(0,-3)+'y'); if(w.endsWith('es')) c.push(w.slice(0,-2)); if(w.endsWith('s')) c.push(w.slice(0,-1));
   if(w.endsWith('ed')){ c.push(w.slice(0,-2),w.slice(0,-1)); if(w.length>4&&w[w.length-3]===w[w.length-4]) c.push(w.slice(0,-3)); }
   if(w.endsWith('ing')){ c.push(w.slice(0,-3),w.slice(0,-3)+'e'); if(w.length>5&&w[w.length-4]===w[w.length-5]) c.push(w.slice(0,-4)); }
@@ -585,8 +589,9 @@ function doScan(quiet){
   const src=$('scSrc').value, jp=!!src, wide=/^(shift_jis|euc-jp|gbk|big5|euc-kr)$/.test(src);
   const r=RS.scan(S.orig,{table:srcTable(),multi:wide,needKana:src==='shift_jis'||src==='euc-jp',minWide:wide&&!/jp|jis/.test(src)?3:0,ptr:S.sys.ptr,term,minLen:+$('scMin').value||4,minRatio:+$('scRatio').value,asciiOnly:!jp&&$('scAscii').checked,needPtr:$('scPtr').checked});
   for(const e of r.entries) if(old.has(e.off)) e.thai=old.get(e.off);
-  S.entries=r.entries; S.page=0; renderText();
-  if(!quiet) toast(r.entries.length?('พบ '+r.entries.length+' ข้อความ'+(r.truncated?' (ตัดที่จำนวนสูงสุด ลองเพิ่มความเข้มงวด)':'')):'ไม่พบข้อความ ลองเอาตัวเลือก "เฉพาะที่มีพอยน์เตอร์" ออก หรือไปหาการเข้ารหัสในแท็บตารางอักษร', 7000);
+  let hid=0; if(!jp&&$('scJunk').checked&&!$('scPtr').checked&&typeof looksEnglish==='function'){ const keep=r.entries.filter(e=>e.thai||looksEnglish(e.text)); hid=r.entries.length-keep.length; r.entries=keep; }
+  S.hidden=hid; S.entries=r.entries; S.page=0; renderText();
+  if(!quiet) toast(r.entries.length?('พบ '+r.entries.length+' ข้อความ'+(hid?' ซ่อนขยะไว้ '+hid+' รายการ':'')+(r.truncated?' (ตัดที่จำนวนสูงสุด ลองเพิ่มความเข้มงวด)':'')):(hid?'ไม่พบข้อความที่เป็นคำอังกฤษ (ซ่อนขยะไว้ '+hid+' รายการ) เกมนี้น่าจะใช้รหัสอักษรของตัวเองหรือบีบอัดข้อความ ลองหาการเข้ารหัสในแท็บตารางอักษร':'ไม่พบข้อความ ลองเอาตัวเลือก "เฉพาะที่มีพอยน์เตอร์" ออก หรือไปหาการเข้ารหัสในแท็บตารางอักษร'), 7000);
 }
 $('btnScan').onclick=()=>doScan(false);
 function pillFor(e){
@@ -675,7 +680,7 @@ function wrapLines(t,n){ if(n<=1||!t) return t; const target=Math.ceil(t.length/
   if(w.length>=n){ const L=[]; let cur=''; for(const x of w){ if(cur&&(cur+' '+x).length>target&&L.length<n-1){ L.push(cur); cur=x; } else cur=cur?cur+' '+x:x; } L.push(cur); return L.join('\n'); }
   const L=[]; let a=0; for(let k=1;k<n;k++){ let b=Math.max(a+1,Math.round(t.length*k/n)); while(b<t.length&&(/[\u0E31\u0E33-\u0E3A\u0E47-\u0E4E]/.test(t[b])||/[เแโใไ]/.test(t[b-1]))) b++; L.push(t.slice(a,b)); a=b; } L.push(t.slice(a)); return L.filter(x=>x).join('\n'); }
 async function mtRun(){ const b=$('btnMt'); if(mtBusy){ mtStop=true; return; }
-  const rows=(S.shown||[]).filter(e=>!e.thai&&/[A-Za-z]{2}/.test(e.text)); if(!rows.length) return toast('หน้านี้ไม่มีข้อความอังกฤษที่ยังไม่แปล ไปหน้าถัดไปแล้วกดอีกครั้ง');
+  const rows=(S.shown||[]).filter(e=>!e.thai&&/[A-Za-z]{2}/.test(e.text)&&(e.ptrs.length||looksEnglish(e.text))); if(!rows.length) return toast('หน้านี้ไม่มีข้อความอังกฤษที่ยังไม่แปล ไปหน้าถัดไปแล้วกดอีกครั้ง');
   mtBusy=true; mtStop=false; liveMem(); let n=0, skip=0; const t0=Date.now();
   try{ for(const e of rows){ if(mtStop) break; let th=suggest(e);
       if(!th){ const m=/((?:<[0-9A-Fa-f]{2}>|\\|\s)*)$/.exec(e.text), suf=m[1], body=e.text.slice(0,e.text.length-suf.length), lines=body.split('\n'), one=lines.map(x=>x.trim()).join(' ').trim();
