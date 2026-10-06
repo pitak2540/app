@@ -1,0 +1,56 @@
+=== AZITO 3 (JAPAN) PS1 GAME - TEXT EXTRACTION ANALYSIS ===
+
+FILE INFORMATION:
+- Original: Azito_3__Japan_.chd (248 MB compressed)
+- Extracted: azito.bin + azito.cue (575 MB uncompressed)
+- Disc Format: PS1 Multi-track CD
+  * Track 01: Data (MODE2/2352, 256,173 sectors, 500.3 MB)
+  * Track 02: Audio (52:54:47 to end)
+
+KEY FINDINGS:
+✓ PS-X EXE executable found at offset 0x2a81808
+✓ ISO9660 filesystems detected at multiple locations
+✓ System strings and BIOS code identified
+✓ Game data structures present
+
+TEXT EXTRACTION CHALLENGES:
+1. PS1 games typically store text in separate data files, not in the main executable
+2. Text is compressed (LZS, LZSS compression common)
+3. Shift-JIS encoding confirmed for Japanese text
+4. Game-specific binary formats (sprite data, level data, dialogue)
+
+COMMON PS1 GAME TEXT STORAGE METHODS:
+- Separate .DAT/.BIN resource files
+- Main.lzs or similar compressed archives
+- Embedded in texture/bitmap files (.TIM format)
+- In debug data sections (when preserved)
+
+NEXT STEPS FOR TEXT EXTRACTION:
+1. Mount/analyze the ISO9660 filesystem properly to list files
+2. Identify game resource files (.DAT, .LZS, .BIN, .TMD, .HIP)
+3. Reverse-engineer compression/format for each file type
+4. Extract dialogue/text sections from game files
+5. Convert from Shift-JIS to Unicode for translation
+
+INTEGRATION WITH 90S THAI ROM STUDIO:
+The tool currently handles:
+✓ GBA ROM text extraction (pointer-based)
+✓ English→Thai translation via quickmt
+✓ Game patching (.BPS format)
+
+For PS1 support, would need:
+- PS1 disc image parser (ISO9660)
+- PS1 compression decompressors (LZS, LZ)
+- Game-specific format handlers (Azito-specific)
+- Binary patching for PS1 executables/data files
+
+TOOLS USED:
+- chdman (MAME CHD tool) - CHD extraction
+- Python 3 - Binary analysis
+- ISO9660 structures - Filesystem parsing
+
+STATUS: Partial analysis complete
+- Disc structure confirmed
+- Game executable located
+- Text encoding identified
+- Full text extraction requires format-specific decompression
