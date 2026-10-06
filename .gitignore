@@ -1,0 +1,20 @@
+# ห้ามอัปโหลด: กุญแจเซ็นแอป, รอมเกม, ไฟล์โมเดลขนาดใหญ่
+*.keystore
+*.jks
+*.gba
+*.nds
+*.sfc
+*.smc
+*.nes
+*.gb
+*.gbc
+*.n64
+*.z64
+*.iso
+*.bin
+*.cue
+*.onnx
+*.wasm
+model-en-th/
+_apk-build/
+node_modules/

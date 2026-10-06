@@ -1,0 +1,947 @@
+<title>90S Thai ROM Studio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+/* Layout: แบนเนอร์เพจอยู่บนสุด ใต้ลงมาเป็นแถบแท็บ 5 เครื่องมือ แต่ละแท็บเป็นแผงทำงานเต็มความกว้าง
+   โทนเดียว (มืด) ตามแบรนด์เพจ 90S Game โดยตั้งใจ */
+:root{
+  color-scheme:dark;
+  --bg:#0D0B24; --panel:#17143A; --panel2:#1F1B4A; --ink:#F1EEFF; --muted:#A9A4D8; --line:#342E6B;
+  --yellow:#FFD23F; --pink:#FF3D8B; --cyan:#2FD8FF;
+  --ok:#52E0A0; --warn:#FFC555; --bad:#FF8080;
+  --display:"Chakra Petch","IBM Plex Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  --body:"IBM Plex Sans Thai","Leelawadee UI",Tahoma,sans-serif;
+  --mono:"IBM Plex Mono",Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:0 48px}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+
+.hero{position:relative;margin-inline:-16px;padding:22px 16px;background:#0D0B24 center/cover no-repeat;border-bottom:2px solid var(--pink);overflow:hidden}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,11,36,.96) 0%,rgba(13,11,36,.82) 45%,rgba(13,11,36,.45) 100%)}
+.hero-in{position:relative;z-index:1;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.hero img{width:84px;height:84px;border-radius:50%;border:2px solid var(--cyan);flex:none}
+.hero h1{font:700 clamp(22px,4vw,32px)/1.1 var(--display);margin:0;letter-spacing:.01em;background:linear-gradient(180deg,var(--yellow),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:4px 0 0;color:var(--ink);max-width:56ch}
+.hero .grow{flex:1 1 260px;min-width:0}
+
+.rombar{display:flex;gap:10px 18px;align-items:center;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--line)}
+.rominfo{flex:1 1 300px;min-width:0;display:flex;gap:4px 16px;flex-wrap:wrap;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.rominfo b{color:var(--ink);font-weight:600}
+.rominfo .name{flex-basis:100%;font-family:var(--body);font-size:15px;color:var(--ink);overflow-wrap:anywhere}
+.tag{display:inline-block;font:600 11px var(--mono);letter-spacing:.06em;padding:2px 7px;border-radius:3px;background:var(--yellow);color:#1a1300;vertical-align:middle}
+
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:7px 13px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--cyan)}
+.btn.pri{background:var(--pink);border-color:var(--pink);color:#fff}
+.btn.pri:hover{filter:brightness(1.1)}
+.btn.sm{padding:4px 9px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input[type=text],input[type=number],select,textarea{background:#100E2C;border:1px solid var(--line);border-radius:6px;padding:6px 9px;min-width:0}
+input[type=number]{width:84px}
+input.hx{font-family:var(--mono);width:110px}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
+label.c{display:flex;gap:6px;align-items:center;font-size:14px}
+.row{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:flex-end}
+
+.tabs{display:flex;gap:4px;overflow-x:auto;padding-top:14px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:9px 14px;font:700 15px var(--display);color:var(--muted);cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected=true]{color:var(--yellow);border-bottom-color:var(--yellow)}
+section.tab{padding-top:18px;display:flex;flex-direction:column;gap:18px}
+h2{font:700 18px var(--display);margin:0;color:var(--cyan)}
+.hint{color:var(--muted);font-size:13.5px;max-width:78ch;margin:0}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px}
+
+.stats{display:flex;gap:6px 18px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.stats b{color:var(--ink);font-family:var(--mono)}
+.entry{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr);gap:10px 14px;padding:12px 0;border-top:1px solid var(--line)}
+.entry .meta{font:12.5px/1.6 var(--mono);color:var(--muted)}
+.entry .meta b{color:var(--yellow);font-weight:600}
+.entry pre{margin:0;font:14px/1.5 var(--body);white-space:pre-wrap;overflow-wrap:anywhere}
+.entry textarea{width:100%;resize:vertical;min-height:44px;line-height:1.5}
+.pill{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;border:1px solid currentColor;margin-top:5px}
+.pill.ok{color:var(--ok)}.pill.mv{color:var(--cyan)}.pill.bad{color:var(--bad)}.pill.no{color:var(--muted)}
+@media (max-width:760px){.entry{grid-template-columns:1fr}}
+.pager{display:flex;gap:10px;align-items:center;justify-content:center;padding-top:8px;font-family:var(--mono);font-size:13px}
+
+textarea.tbl{font:13px/1.5 var(--mono);width:100%;height:320px}
+.scroll{overflow-x:auto;max-width:100%}
+canvas{display:block;image-rendering:pixelated}
+#tileCv,#glyphCv{background:#05040F;border:1px solid var(--line);cursor:crosshair}
+#coverCv{max-width:100%;height:auto;image-rendering:auto;border:1px solid var(--line);background:#05040F}
+.list{margin:0;padding-left:18px;font-size:14px}.list li{margin:2px 0}
+.mono{font-family:var(--mono)}
+.msg{font-size:14px}.msg.bad{color:var(--bad)}.msg.ok{color:var(--ok)}.msg.warn{color:var(--warn)}
+.disclist{max-height:230px;overflow:auto;display:flex;flex-direction:column;gap:1px;border:1px solid var(--line);border-radius:6px;padding:4px}
+.disclist button{display:flex;gap:10px;justify-content:space-between;text-align:left;background:none;border:0;border-radius:4px;padding:5px 8px;cursor:pointer;font:13px var(--mono);color:var(--ink)}
+.disclist button:hover{background:var(--panel2)}.disclist button.cur{color:var(--yellow)}.disclist small{color:var(--muted);white-space:nowrap}
+.sw{display:flex;flex-wrap:wrap;gap:3px}.sw button{width:22px;height:22px;border:1px solid var(--line);border-radius:3px;padding:0;cursor:pointer}.sw button.on{outline:2px solid var(--cyan);outline-offset:1px}
+#tgCv{background:#05040F;border:1px solid var(--line);cursor:crosshair}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel2);border:1px solid var(--cyan);border-radius:8px;padding:10px 16px;max-width:min(92vw,560px);z-index:9;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+
+<div class="wrap">
+  <header class="hero" id="hero">
+    <div class="hero-in">
+      <img src="__LOGO__" alt="โลโก้เพจ 90S Game" id="logoImg">
+      <div class="grow">
+        <h1>90S Thai ROM Studio</h1>
+        <p>แกะข้อความอังกฤษ ญี่ปุ่น จีน เกาหลี และภาษายุโรปจากรอมเกม GBA, แผ่น PS1, Nintendo และเครื่องอื่น แปลเป็นไทย ใส่กลับ สร้างแพตช์ ใส่เครดิตเพจในเกม และทำปกเกม ทุกอย่างทำงานในเครื่องคุณ ไฟล์รอมไม่ถูกส่งไปที่ไหน</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="rombar">
+    <div class="rominfo" id="romInfo"></div>
+    <button class="btn pri" id="btnOpenRom">เปิดรอม</button>
+    <button class="btn" id="btnSaveProj">บันทึกงานแปล</button>
+    <button class="btn" id="btnOpenProj">เปิดงานแปล</button>
+    <input type="file" id="fileRom" hidden>
+    <input type="file" id="fileProj" accept=".json" hidden>
+  </div>
+
+  <p class="hint" id="sysNote" style="margin-top:10px"></p>
+  <details class="hint" style="margin-top:6px"><summary style="cursor:pointer">ระบบที่รองรับ (ครอบคลุมเครื่องเล่น R36S)</summary>
+    <ul class="list">
+      <li><b>ย้ายข้อความและขยายรอมได้:</b> Game Boy Advance, Mega Drive / Genesis</li>
+      <li><b>ย้ายข้อความได้ในที่ว่างของไฟล์:</b> PlayStation (.bin / .iso), Nintendo DS, Neo Geo Pocket, Virtual Boy</li>
+      <li><b>แปลแบบลงที่เดิม พร้อมแก้ checksum:</b> Game Boy / Color, Super Famicom, Master System, Game Gear, WonderSwan</li>
+      <li><b>แปลแบบลงที่เดิม:</b> Famicom / NES, Famicom Disk System, Nintendo 64, PC Engine, Atari 2600 / 7800 / Lynx, ColecoVision, MSX, SG-1000, Pokemon Mini</li>
+      <li><b>ชุดรอม .zip (อาร์เคด FBNeo / MAME, Neo Geo, CPS):</b> เปิด .zip แล้วเลือกไฟล์รอมข้างในมาแปล บันทึกกลับเป็น .zip ได้ รอม 68000 ส่วนใหญ่ต้องติ๊ก "สลับไบต์คู่" อีมูเลเตอร์จะเตือนว่า CRC ไม่ตรงกับฐานข้อมูล</li>
+      <li><b>แผ่น PSP และแผ่น .iso อื่น:</b> เปิดดูและแปลไฟล์ข้างในได้ถ้าไฟล์นั้นไม่เข้ารหัสหรือบีบอัด</li>
+      <li><b>ต้องแปลงก่อน:</b> .chd .cso .pbp และแผ่น Dreamcast (.gdi / .cdi) ให้แปลงเป็น .bin หรือ .iso ก่อนเปิด</li>
+    </ul></details>
+  <div class="box" id="discBox" hidden style="margin-top:12px">
+    <h2>ไฟล์ในแผ่น</h2>
+    <p class="hint" id="discHint"></p>
+    <div class="row"><input type="text" id="discSearch" placeholder="ค้นหาชื่อไฟล์" style="flex:1 1 180px"><label class="c"><input type="checkbox" id="discAll"> แสดงไฟล์ภาพ เสียง วิดีโอด้วย</label></div>
+    <div class="disclist" id="discList"></div>
+  </div>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-t="text" aria-selected="true">ข้อความ</button>
+    <button role="tab" data-t="dict" aria-selected="false">พจนานุกรม</button>
+    <button role="tab" data-t="table" aria-selected="false">ตารางอักษร</button>
+    <button role="tab" data-t="font" aria-selected="false">ฟอนต์</button>
+    <button role="tab" data-t="patch" aria-selected="false">แพตช์</button>
+    <button role="tab" data-t="title" aria-selected="false">เครดิตในเกม</button>
+    <button role="tab" data-t="cover" aria-selected="false">ปกเกม</button>
+  </nav>
+
+  <!-- ข้อความ -->
+  <section class="tab" id="tab-text">
+    <div class="box">
+      <h2>แกะข้อความจากรอม</h2>
+      <div class="row">
+        <label class="f">ภาษาต้นฉบับในเกม<select id="scSrc" style="max-width:260px"><option value="">อังกฤษ / ตามตารางอักษร</option><option value="shift_jis">ญี่ปุ่น (Shift-JIS)</option><option value="euc-jp">ญี่ปุ่น (EUC-JP)</option><option value="gbk">จีนตัวย่อ (GBK)</option><option value="big5">จีนตัวเต็ม (Big5)</option><option value="euc-kr">เกาหลี (EUC-KR)</option><option value="windows-1252">ยุโรปตะวันตก: ฝรั่งเศส เยอรมัน สเปน อิตาลี โปรตุเกส (Windows-1252)</option><option value="windows-1250">ยุโรปกลาง: โปแลนด์ เช็ก ฮังการี (Windows-1250)</option><option value="windows-1251">รัสเซีย (Windows-1251)</option><option value="windows-1253">กรีก (Windows-1253)</option><option value="windows-1254">ตุรกี (Windows-1254)</option><option value="windows-1258">เวียดนาม (Windows-1258)</option><option value="windows-1256">อาหรับ (Windows-1256)</option><option value="windows-874">ไทย (Windows-874 / TIS-620)</option></select></label>
+        <label class="f">ยาวอย่างน้อย (ไบต์)<input type="number" id="scMin" value="4" min="2" max="64"></label>
+        <label class="f">ไบต์ปิดข้อความ (hex)<input type="text" class="hx" id="scTerm" value="00" maxlength="2"></label>
+        <label class="f">สัดส่วนตัวอักษรขั้นต่ำ<select id="scRatio"><option value="0.5">50% (ได้เยอะ มีขยะปน)</option><option value="0.7" selected>70%</option><option value="0.85">85% (เข้มงวด)</option></select></label>
+        <label class="c"><input type="checkbox" id="scAscii" checked> สแกนเฉพาะอักษรอังกฤษ</label>
+        <label class="c"><input type="checkbox" id="scPtr" checked> เฉพาะที่มีพอยน์เตอร์ชี้</label>
+        <label class="c"><input type="checkbox" id="scSwap"> สลับไบต์คู่ (รอมอาร์เคด / Neo Geo / .v64)</label>
+        <button class="btn pri" id="btnScan">แกะข้อความ</button>
+      </div>
+      <p class="hint">ข้อความที่มีพอยน์เตอร์ชี้มักเป็นบทพูดและเมนูจริง และย้ายที่ได้เมื่อคำแปลยาวกว่าเดิม ถ้าเกมไม่ได้เก็บข้อความเป็น ASCII ให้ไปตั้งตารางอักษรก่อน เกมญี่ปุ่นของ PS1 และ GBA หลายเกมเก็บข้อความเป็น Shift-JIS เลือกภาษาต้นฉบับเป็นญี่ปุ่นแล้วกดแกะได้เลย ส่วนเกมญี่ปุ่นของ Famicom, Super Famicom และ Game Boy มักใช้รหัสอักษรของตัวเอง ต้องทำตารางอักษร (.tbl) ก่อน</p>
+    </div>
+    <div>
+      <div class="row" style="justify-content:space-between">
+        <div class="stats" id="txStats"></div>
+        <div class="row">
+          <input type="text" id="txSearch" placeholder="ค้นหาข้อความ" style="width:170px">
+          <select id="txFilter"><option value="all">ทั้งหมด</option><option value="todo">ยังไม่แปล</option><option value="done">แปลแล้ว</option><option value="bad">มีปัญหา</option></select>
+          <button class="btn sm" id="btnFill">เติมคำแปลอัตโนมัติ (ออฟไลน์)</button>
+          <button class="btn sm" id="btnDraft">แปลร่างหน้านี้ (ออฟไลน์)</button>
+          <button class="btn sm pri" id="btnMt" hidden>แปลออฟไลน์ด้วยโมเดล</button>
+          <button class="btn sm pri" id="btnAi">ให้ Claude แปลหน้านี้</button>
+          <button class="btn sm" id="btnAiCfg" hidden>ตั้งค่า Claude</button>
+          <button class="btn sm" id="btnGt">Google Translate</button>
+          <button class="btn sm" id="btnCsvOut">ส่งออก CSV</button>
+          <button class="btn sm" id="btnCsvIn">นำเข้า CSV</button>
+          <input type="file" id="fileCsv" accept=".csv" hidden>
+        </div>
+      </div>
+      <div class="box" id="aiBox" hidden style="margin-top:12px">
+        <h2>ตั้งค่าปุ่ม "ให้ Claude แปลหน้านี้"</h2>
+        <p class="hint">ในโปรแกรม .exe .apk และไฟล์ .html ปุ่มนี้ส่งข้อความในหน้าที่เปิดอยู่ไปให้ Claude แปลผ่านอินเทอร์เน็ต ต้องใช้ API key ของคุณเอง สร้างได้ที่ platform.claude.com มีค่าใช้จ่ายตามปริมาณที่ใช้ และคิดแยกจากแพ็กเกจสมาชิก Claude คีย์ถูกเก็บไว้ในเครื่องนี้เท่านั้น และถูกส่งไปที่ api.anthropic.com ที่เดียว</p>
+        <div class="row">
+          <label class="f" style="flex:1 1 260px">API key<input type="password" id="aiKey" placeholder="sk-ant-..." autocomplete="off"></label>
+          <label class="f">รุ่นที่ใช้แปล<select id="aiModel"><option value="claude-haiku-4-5-20251001">Haiku 4.5 (เร็ว ราคาถูก)</option><option value="claude-sonnet-5-5">Sonnet 5.5 (สมดุล)</option><option value="claude-opus-5-5">Opus 5.5 (ละเอียดที่สุด)</option></select></label>
+          <button class="btn pri" id="btnAiSave">บันทึก</button>
+          <button class="btn" id="btnAiDel">ลบคีย์ออกจากเครื่อง</button>
+        </div>
+        <div class="msg" id="aiMsg"></div>
+      </div>
+      <div class="box" id="mtBox" hidden style="margin-top:12px">
+        <h2>แปลออฟไลน์ด้วยโมเดล (อังกฤษเป็นไทย)</h2>
+        <p class="hint">แปลทั้งประโยคในเครื่องนี้โดยไม่ใช้อินเทอร์เน็ต ครั้งแรกให้กด "เลือกไฟล์โมเดล" แล้วเลือกไฟล์ทั้งหมดในโฟลเดอร์ <span class="mono">model-en-th</span> (กด Ctrl+A ในหน้าต่างเลือกไฟล์) โปรแกรมจะจำโมเดลไว้ในเครื่อง ครั้งต่อไปกดปุ่มแปลได้เลย ใช้หน่วยความจำประมาณ 500 MB</p>
+        <div class="row"><button class="btn pri" id="mtPick">เลือกไฟล์โมเดล</button><input type="file" id="fileMt" multiple hidden><button class="btn" id="mtForget">ลืมโมเดลที่จำไว้</button><button class="btn" id="mtClose">ปิด</button><span class="msg" id="mtMsg"></span></div>
+        <p class="hint">โมเดล QuickMT en-th (quickmt/quickmt-en-th) สัญญาอนุญาต CC BY 4.0 แปลงเป็น ONNX โดย KaoJai.ai</p>
+      </div>
+      <div class="box" id="gtBox" hidden style="margin-top:12px">
+        <h2>แปลหน้านี้ด้วย Google Translate (ต้องต่ออินเทอร์เน็ต)</h2>
+        <p class="hint"><b>แบบฟรี:</b> กดลิงก์ด้านล่างเพื่อเปิด Google Translate พร้อมข้อความที่ยังไม่แปลในหน้านี้ คัดลอกคำแปลทั้งหมดกลับมาวางในช่อง แล้วกด "ใส่คำแปลที่วาง" ข้อความหนึ่งรายการคือหนึ่งบรรทัด เครื่องหมาย ¶ แทนการขึ้นบรรทัดใหม่ในเกม อย่าลบออก</p>
+        <div class="row"><a class="btn pri" id="gtLink" href="https://translate.google.com/" target="_blank" rel="noopener">เปิด Google Translate</a><button class="btn" id="gtCopy">คัดลอกข้อความต้นฉบับ</button><span class="msg" id="gtInfo"></span></div>
+        <textarea id="gtPaste" class="tbl" style="height:140px;font-family:var(--body)" placeholder="วางคำแปลจาก Google Translate ที่นี่"></textarea>
+        <div class="row"><button class="btn pri" id="gtApply">ใส่คำแปลที่วาง</button><button class="btn" id="gtClose">ปิด</button><span class="msg" id="gtMsg"></span></div>
+        <p class="hint"><b>แบบอัตโนมัติ:</b> ถ้ามี API key ของ Google Cloud Translation ใส่ไว้ที่นี่ ปุ่ม Google Translate จะแปลและเติมให้เองโดยไม่ต้องคัดลอกวาง Google คิดค่าบริการตามจำนวนตัวอักษร คีย์ถูกเก็บในเครื่องนี้เท่านั้น</p>
+        <div class="row"><label class="f" style="flex:1 1 260px">Google API key (ไม่บังคับ)<input type="password" id="gtKey" autocomplete="off"></label><button class="btn" id="gtSave">บันทึกคีย์</button><button class="btn" id="gtAuto">แปลอัตโนมัติด้วยคีย์นี้</button></div>
+      </div>
+      <div id="txList" style="margin-top:12px"></div>
+      <div class="pager" id="txPager"></div>
+    </div>
+  </section>
+
+  <!-- พจนานุกรม -->
+  <section class="tab" id="tab-dict" hidden>
+    <div class="cols">
+      <div class="box">
+        <h2>พจนานุกรมของคุณ</h2>
+        <p class="hint">บรรทัดละคู่ <span class="mono">คำต้นฉบับ=คำแปล</span> ใช้ได้กับทุกภาษา เช่นชื่อตัวละคร ชื่อท่า ศัพท์เฉพาะของเกม โปรแกรมใช้คำเหล่านี้เติมคำแปลและแสดงคำแนะนำใต้แต่ละข้อความ โดยไม่ต้องต่ออินเทอร์เน็ต</p>
+        <textarea class="tbl" id="glText" spellcheck="false" placeholder="Luffy=ลูฟี่&#10;Gum-Gum Pistol=หมัดยางยืด&#10;ルフィ=ลูฟี่"></textarea>
+        <label class="c"><input type="checkbox" id="glBuiltin" checked> <span id="glBuiltinLabel">ใช้พจนานุกรมศัพท์เกมในตัว</span></label>
+        <div class="row">
+          <button class="btn pri" id="btnGlApply">ใช้พจนานุกรมนี้</button>
+          <button class="btn" id="btnGlOpen">เปิดไฟล์</button>
+          <button class="btn" id="btnGlSave">บันทึกไฟล์</button>
+          <input type="file" id="fileGl" accept=".txt,.csv" hidden>
+        </div>
+        <div class="msg" id="glMsg"></div>
+      </div>
+      <div class="box">
+        <h2>คำแปลจากงานเก่า</h2>
+        <p class="hint">นำเข้าไฟล์ CSV หรืองานแปล (.json) ที่เคยทำ โปรแกรมจะจำคู่ต้นฉบับกับคำแปลไว้ เมื่อเกมใหม่มีข้อความเดียวกันจะเติมให้ทันที เหมาะกับเกมภาคต่อหรือเกมจากผู้สร้างเดียวกัน</p>
+        <div class="row"><button class="btn" id="btnMemIn">นำเข้างานเก่า</button><button class="btn" id="btnMemClear">ล้างที่จำไว้</button><input type="file" id="fileMem" accept=".csv,.json" hidden></div>
+        <div class="msg" id="memMsg"></div>
+        <h2>แปลตอนออฟไลน์ทำอะไรได้บ้าง</h2>
+        <ul class="list">
+          <li>ปุ่ม "เติมคำแปลอัตโนมัติ" ในแท็บข้อความ เติมข้อความที่ตรงกับพจนานุกรม งานเก่า หรือข้อความซ้ำที่แปลไว้แล้วในเกมเดียวกัน</li>
+          <li>ปุ่ม "แปลร่างหน้านี้" แปลประโยคอังกฤษแบบคำต่อคำจากคลังคำในตัว ได้ความหมายคร่าว ๆ แต่ไม่เป็นธรรมชาติเท่า Claude ต้องอ่านและเกลาทุกข้อความ ชื่อเฉพาะที่ไม่รู้จักจะคงไว้ตามเดิม</li>
+          <li>ใต้ข้อความที่ยังไม่แปลจะมีคำศัพท์ที่พบในประโยคให้ดูประกอบ</li>
+          <li>ถ้าต้องการคำแปลที่อ่านลื่นทั้งประโยค ใช้ปุ่ม "ให้ Claude แปลหน้านี้" ซึ่งต้องต่ออินเทอร์เน็ต หรือส่งออก CSV ไปแปลแล้วนำเข้ากลับ</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ตารางอักษร -->
+  <section class="tab" id="tab-table" hidden>
+    <div class="cols">
+      <div class="box">
+        <h2>ตารางอักษร (.tbl)</h2>
+        <p class="hint">บรรทัดละคู่ <span class="mono">ไบต์=ตัวอักษร</span> เช่น <span class="mono">A1=ก</span> ค่าเริ่มต้นคือ ASCII และอักษรไทยแบบ TIS-620 (A1–FB) แก้ให้ตรงกับตำแหน่งที่ฟอนต์ไทยอยู่ในเกม ไบต์ที่ไม่อยู่ในตารางจะแสดงเป็น <span class="mono">&lt;XX&gt;</span> และพิมพ์แบบเดียวกันในคำแปลได้</p>
+        <textarea class="tbl" id="tblText" spellcheck="false"></textarea>
+        <div class="row">
+          <button class="btn pri" id="btnTblApply">ใช้ตารางนี้</button>
+          <button class="btn" id="btnTblReset">คืนค่าเริ่มต้น</button>
+          <button class="btn" id="btnTblOpen">เปิด .tbl</button>
+          <button class="btn" id="btnTblSave">บันทึก .tbl</button>
+          <input type="file" id="fileTbl" accept=".tbl,.txt" hidden>
+        </div>
+        <div class="msg" id="tblMsg"></div>
+      </div>
+      <div class="box">
+        <h2>หาการเข้ารหัสของเกม</h2>
+        <p class="hint">ถ้าแกะแล้วไม่เจอข้อความ เกมอาจใช้รหัสอักษรของตัวเอง พิมพ์คำที่เห็นในเกม (ตัวพิมพ์เดียวกันทั้งคำ อย่างน้อย 3 ตัว เช่น START) โปรแกรมจะหาลำดับไบต์ที่มีระยะห่างระหว่างตัวอักษรตรงกัน</p>
+        <div class="row">
+          <input type="text" id="relWord" placeholder="เช่น CONTINUE" style="flex:1 1 160px">
+          <button class="btn" id="btnRel">ค้นหา</button>
+        </div>
+        <div id="relOut" class="msg"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ฟอนต์ -->
+  <section class="tab" id="tab-font" hidden>
+    <div class="box">
+      <h2>ดูกราฟิกและฟอนต์ในรอม</h2>
+      <div class="row">
+        <label class="f">ตำแหน่ง (hex)<input type="text" class="hx" id="tvOff" value="0"></label>
+        <label class="f">สี<select id="tvBpp"><option value="1">1bpp</option><option value="2n">2bpp (NES)</option><option value="2g">2bpp (GB / SNES)</option><option value="4">4bpp ไทล์ (GBA / DS)</option><option value="4l">4bpp เรียงแถว (PS1)</option><option value="8">8bpp ไทล์</option></select></label>
+        <label class="f">กว้างช่อง<input type="number" id="tvW" value="8" min="4" max="32"></label>
+        <label class="f">สูงช่อง<input type="number" id="tvH" value="8" min="4" max="32"></label>
+        <label class="f">ช่องต่อแถว<input type="number" id="tvCols" value="16" min="4" max="64"></label>
+        <label class="f">ขยาย<select id="tvZoom"><option>2</option><option selected>3</option><option>4</option></select></label>
+        <label class="c"><input type="checkbox" id="tvLsb"> 1bpp กลับบิต</label>
+        <button class="btn sm" id="tvPrev">◀ ก่อนหน้า</button>
+        <button class="btn sm" id="tvNext">ถัดไป ▶</button>
+      </div>
+      <div class="scroll"><canvas id="tileCv" width="384" height="288"></canvas></div>
+      <div class="msg mono" id="tvInfo">คลิกที่ช่องเพื่อดูตำแหน่ง</div>
+      <p class="hint">เลื่อนหาจนเห็นตัวอักษร A B C ของเกม ถ้าเห็นแต่จุดมั่ว ลองเปลี่ยนจำนวนสีหรือขนาดช่อง ฟอนต์ที่ถูกบีบอัด (LZ77) จะมองไม่เห็นตรงนี้และต้องแก้เฉพาะเกม</p>
+    </div>
+    <div class="box">
+      <h2>วาดฟอนต์ไทยลงรอม</h2>
+      <p class="hint">ใช้ได้กับฟอนต์ที่ไม่บีบอัดและทุกช่องขนาดเท่ากัน ใส่ตำแหน่งที่ฟอนต์เริ่ม และไบต์ของตัวอักษรตัวแรกในฟอนต์ (มักเป็น 20 คือช่องว่าง) โปรแกรมจะวาดอักษรไทยทุกตัวในตารางอักษรลงช่องของไบต์นั้น ใช้ค่าสี ขนาดช่อง จากด้านบน</p>
+      <div class="row">
+        <label class="f">ฟอนต์เริ่มที่ (hex)<input type="text" class="hx" id="gfBase" value="0"></label>
+        <label class="f">ไบต์ตัวแรก (hex)<input type="text" class="hx" id="gfFirst" value="20" maxlength="2"></label>
+        <label class="f">แบบอักษร<input type="text" id="gfFam" value="Tahoma, Leelawadee UI, sans-serif" style="width:220px"></label>
+        <label class="f">ขนาด px<input type="number" id="gfPx" value="8" min="5" max="32"></label>
+        <label class="f">เลื่อนขึ้นลง<input type="number" id="gfY" value="0" min="-8" max="8"></label>
+        <label class="f">สีตัวอักษร<input type="number" id="gfFg" value="1" min="0" max="255"></label>
+        <label class="f">สีพื้น<input type="number" id="gfBg" value="0" min="0" max="255"></label>
+        <label class="c"><input type="checkbox" id="gfBold"> ตัวหนา</label>
+      </div>
+      <div class="scroll"><canvas id="glyphCv" width="384" height="96"></canvas></div>
+      <div class="row">
+        <button class="btn pri" id="btnGfWrite">เขียนฟอนต์ไทยลงรอม</button>
+        <button class="btn" id="btnGfClear">ลบฟอนต์ไทยที่เขียนไว้</button>
+        <span class="msg" id="gfMsg"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- แพตช์ -->
+  <section class="tab" id="tab-patch" hidden>
+    <div class="cols">
+      <div class="box">
+        <h2>สร้างรอมภาษาไทยและแพตช์</h2>
+        <div id="bdReport" class="msg"></div>
+        <div class="row">
+          <label class="f">ชื่อไฟล์ผลลัพธ์<input type="text" id="bdName" style="width:min(100%,320px)"></label>
+          <label class="f">ที่ว่างสำหรับข้อความที่ย้าย (hex, เว้นว่าง = หาให้เอง)<input type="text" class="hx" id="bdFree" placeholder="อัตโนมัติ"></label>
+        </div>
+        <div class="row">
+          <button class="btn pri" id="btnBps">บันทึกแพตช์ .bps</button>
+          <button class="btn pri" id="btnPpf" hidden>บันทึกแพตช์ .ppf</button>
+          <button class="btn" id="btnGba">บันทึกรอมภาษาไทย</button>
+          <button class="btn" id="btnImg" hidden>บันทึกอิมเมจแผ่นภาษาไทย</button>
+        </div>
+        <p class="hint">แพตช์มีแค่ส่วนที่เปลี่ยน ไม่มีตัวเกม จึงแจกในเพจได้ คนเล่นต้องมีรอมหรือแผ่นต้นฉบับรุ่นเดียวกับที่คุณเปิดอยู่ รอมตลับใช้ .bps ส่วนแผ่น PS1 ใช้ .ppf และรวมทุกไฟล์ในแผ่นที่คุณแปลไว้</p>
+      </div>
+      <div class="box">
+        <h2>แปะแพตช์ลงรอม</h2>
+        <p class="hint">เลือกไฟล์ .bps .ips หรือ .ppf โปรแกรมจะแปะลงรอมหรืออิมเมจแผ่นที่เปิดอยู่ ตรวจความถูกต้อง แล้วบันทึกผลลัพธ์</p>
+        <label class="c"><input type="checkbox" id="apIgnore"> แปะต่อแม้ CRC ไม่ตรง</label>
+        <div class="row"><button class="btn pri" id="btnApply">เลือกไฟล์แพตช์แล้วแปะ</button><input type="file" id="filePatch" accept=".bps,.ips,.ppf" hidden></div>
+        <div class="msg" id="apMsg"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- เครดิตในเกม -->
+  <section class="tab" id="tab-title" hidden>
+    <div class="box">
+      <h2>ใส่เครดิตเพจบนหน้าไตเติลของเกม</h2>
+      <p class="hint">หาภาพหน้าไตเติลในรายการ คลิกบนภาพตรงที่อยากวางเครดิต แล้วกด "ใส่กลับลงรอม" เครดิตจะถูกรวมตอนสร้างแพตช์ เกม GBA และ DS มักบีบอัดภาพไว้ (LZ77) โปรแกรมค้นหาและบีบอัดกลับให้ ส่วนเกมที่ไม่บีบอัด เช่นไฟล์ภาพ TIM ของ PS1 ให้ใส่ตำแหน่งเอง</p>
+      <div class="row">
+        <label class="f" style="flex:1 1 260px">กราฟิกที่บีบอัดในรอม<select id="tgList"><option value="">ยังไม่ได้ค้นหา</option></select></label>
+        <button class="btn sm" id="tgPrevB">◀ ก่อนหน้า</button><button class="btn sm" id="tgNextB">ถัดไป ▶</button>
+        <button class="btn" id="tgScan">ค้นหาใหม่</button>
+      </div>
+      <div class="row">
+        <label class="f">หรือเปิดกราฟิกไม่บีบอัดที่ (hex)<input type="text" class="hx" id="tgRawOff"></label>
+        <label class="f">ยาว (hex ไบต์)<input type="text" class="hx" id="tgRawLen" value="9600"></label>
+        <button class="btn" id="tgRawOpen">เปิด</button>
+        <span class="msg" id="tgMsg"></span>
+      </div>
+    </div>
+    <div class="box">
+      <div class="row">
+        <label class="f">รูปแบบภาพ<select id="tgMode"><option value="4t">4bpp ไทล์ (16 สี)</option><option value="8t">8bpp ไทล์ (256 สี)</option><option value="8l">8bpp ภาพเต็ม</option><option value="4l">4bpp เรียงแถว (PS1)</option><option value="16">16 บิต ภาพเต็ม</option></select></label>
+        <label class="f">กว้าง (px)<input type="number" id="tgW" value="240" min="8" max="1024" step="8"></label>
+        <label class="f">ขยาย<select id="tgZoom"><option>1</option><option selected>2</option><option>3</option></select></label>
+        <label class="f">พาเลตที่ (hex, ไม่ใส่ = ขาวดำ)<input type="text" class="hx" id="tgPal"></label>
+      </div>
+      <div class="row">
+        <label class="f" style="flex:1 1 220px">ข้อความเครดิต<input type="text" id="tgText" value="แปลไทยโดยเพจ 90S Game"></label>
+        <label class="f">แบบอักษร<input type="text" id="tgFam" value="Tahoma, Leelawadee UI, sans-serif" style="width:200px"></label>
+        <label class="f">ขนาด px<input type="number" id="tgPx" value="11" min="6" max="48"></label>
+        <label class="c"><input type="checkbox" id="tgBold" checked> ตัวหนา</label>
+      </div>
+      <div class="row">
+        <label class="f">สีตัวอักษร (ลำดับในพาเลต)<input type="number" id="tgFg" value="15" min="0" max="255"></label>
+        <label class="f">สีขอบ (-1 = ไม่มีขอบ)<input type="number" id="tgOl" value="-1" min="-1" max="255"></label>
+        <label class="f">สีตัวอักษรภาพ 16 บิต<input type="color" id="tgRgb" value="#ffffff"></label>
+        <label class="f">X<input type="number" id="tgX" value="8"></label>
+        <label class="f">Y<input type="number" id="tgY" value="8"></label>
+      </div>
+      <div class="sw" id="tgSw" aria-label="เลือกสีตัวอักษรจากพาเลต"></div>
+      <div class="scroll"><canvas id="tgCv" width="480" height="64"></canvas></div>
+      <p class="hint">ถ้าภาพดูเป็นชิ้นสลับกัน เกมนั้นใช้ไทล์ซ้ำกับแผนที่ไทล์ เครดิตจะไปโผล่ทุกจุดที่ไทล์นั้นถูกใช้ ให้วางทับไทล์ที่ใช้ที่เดียว เช่นตัวหนังสือ PRESS START หรือบรรทัดลิขสิทธิ์ ลองปรับ "กว้าง" ให้ภาพเรียงตัวถูกก่อน</p>
+      <div class="row">
+        <button class="btn pri" id="tgCommit">ใส่กลับลงรอม</button>
+        <button class="btn" id="tgReset">เอาเครดิตออกจากภาพ</button>
+        <button class="btn" id="tgPng">บันทึกภาพตัวอย่าง .png</button>
+        <span class="msg" id="tgOut"></span>
+      </div>
+      <ul class="list" id="tgDone"></ul>
+    </div>
+  </section>
+
+  <!-- ปกเกม -->
+  <section class="tab" id="tab-cover" hidden>
+    <div class="cols">
+      <div class="box">
+        <h2>ทำปกเกมพร้อมเครดิตเพจ</h2>
+        <div class="row">
+          <button class="btn" id="btnCvImg">เลือกรูปพื้นหลัง</button>
+          <button class="btn" id="btnCvLogo">เปลี่ยนโลโก้เพจ</button>
+          <input type="file" id="fileCvImg" accept="image/*" hidden><input type="file" id="fileCvLogo" accept="image/*" hidden>
+          <label class="f">ขนาด<select id="cvSize"><option value="600x800">600×800 แนวตั้ง</option><option value="512x512">512×512 จัตุรัส</option><option value="480x320">480×320 สัดส่วนจอ GBA</option><option value="1280x720">1280×720 แนวนอน</option></select></label>
+        </div>
+        <label class="f">ชื่อเกม<input type="text" id="cvTitle"></label>
+        <label class="f">บรรทัดรอง<input type="text" id="cvSub" value="ภาษาไทย"></label>
+        <label class="f">เครดิต<input type="text" id="cvCredit" value="แปลไทยโดยเพจ 90S Game"></label>
+        <div class="row">
+          <label class="f">ตำแหน่งชื่อเกม<select id="cvPos"><option value="top">บน</option><option value="mid">กลาง</option><option value="bot" selected>ล่าง</option></select></label>
+          <label class="f">เครดิตแบบ<select id="cvStyle"><option value="bar">แถบล่างพร้อมโลโก้</option><option value="badge">ป้ายมุมบนพร้อมโลโก้</option><option value="text">ตัวหนังสืออย่างเดียว</option></select></label>
+          <label class="f">สีชื่อเกม<input type="color" id="cvColor" value="#ffd23f"></label>
+          <label class="c"><input type="checkbox" id="cvDim" checked> ทำพื้นหลังมืดลงให้อ่านง่าย</label>
+        </div>
+        <div class="row"><button class="btn pri" id="btnCvSave">บันทึกปก .png</button></div>
+        <p class="hint">รูปพื้นหลังใช้ภาพหน้าจอเกมหรือภาพที่คุณมีสิทธิ์ใช้ โปรแกรมจะครอบให้เต็มขนาดปกเอง</p>
+      </div>
+      <div class="box"><div class="scroll"><canvas id="coverCv" width="600" height="800"></canvas></div></div>
+    </div>
+  </section>
+
+  <footer>90S Thai ROM Studio · เครื่องมือของเพจ 90S Game · รองรับรอมของเครื่องเล่น R36S: GBA, PS1, DS, N64, Famicom, Super Famicom, Game Boy, Mega Drive, อาร์เคด และอื่น ๆ</footer>
+</div>
+<div id="toast" hidden role="status"></div>
+
+<!--ORT-->
+<script>/*CORE*/</script>
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id), RS = window.RS, hex = RS.hex;
+const BANNER = '__BANNER__';
+$('hero').style.backgroundImage = 'url(' + BANNER + ')';
+const defaultPairs = () => RS.asciiPairs().concat(RS.thaiPairs());
+const S = { orig:null, name:'', demo:true, entries:[], table:RS.makeTable(defaultPairs()), patches:[], gfx:[], term:0, page:0, work:null, disc:null, sub:null };
+const PER = 50;
+const caps = (location.protocol !== 'file:' && window.claude && window.claude.use) ? { dl: window.claude.use('downloads'), ai: window.claude.use('sample') } : null;
+
+let toastT; function toast(m, ms){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, ms||4500); }
+const parseHex = s => { s=String(s).trim().replace(/^0x/i,''); return /^[0-9a-f]+$/i.test(s) ? parseInt(s,16) : NaN; };
+const readFile = f => new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(new Uint8Array(r.result)); r.onerror=()=>rej(r.error); r.readAsArrayBuffer(f); });
+const readSlice = async (f,o,n) => new Uint8Array(await f.slice(o,o+n).arrayBuffer());
+const text8 = u8 => new TextDecoder('utf-8').decode(u8);
+const baseName = () => S.name.replace(/^.*\//,'').replace(/\.[^.]+$/,'');
+const discBase = () => S.disc.file.name.replace(/\.[^.]+$/,'').replace(/\s*\(Track 0?1\)/i,'');
+const fmtSize = n => n<1048576 ? (n/1024).toFixed(n<10240?1:0)+' KB' : (n/1048576).toFixed(n<10485760?1:0)+' MB';
+function pick(inputId, fn){ const i=$(inputId); i.onchange=async()=>{ const f=i.files[0]; i.value=''; if(f) try{ await fn(f); }catch(e){ toast(e.message||String(e), 8000); } }; return ()=>i.click(); }
+
+async function save(filename, data){
+  const isBlob = data instanceof Blob, u8 = isBlob ? null : typeof data==='string' ? new TextEncoder().encode(data) : data;
+  if (window.AndroidBridge) {
+    const blob = isBlob ? data : new Blob([u8]), err = AndroidBridge.begin(filename); if (err) { toast('บันทึกไม่สำเร็จ: ' + err, 8000); return; }
+    for (let o = 0; o < blob.size; o += 786432) { const r = AndroidBridge.write(b64(new Uint8Array(await blob.slice(o, o + 786432).arrayBuffer()))); if (r) { AndroidBridge.end(); toast('บันทึกไม่สำเร็จ: ' + r, 8000); return; } }
+    toast('บันทึกไว้ที่ ' + AndroidBridge.end(), 7000); return;
+  }
+  if (caps) {
+    if (isBlob) { toast('หน้าเว็บบันทึกไฟล์ขนาดใหญ่ไม่ได้ ให้ใช้ไฟล์โปรแกรมในโฟลเดอร์ 90S แทน', 7000); return; }
+    const dl = await caps.dl;
+    if (!dl) { toast('หน้านี้บันทึกไฟล์ไม่ได้ ให้ใช้ไฟล์โปรแกรมในโฟลเดอร์ 90S แทน'); return; }
+    let name=filename, blob=new Blob([u8]);
+    if (!/\.(png|json|csv|txt|zip)$/i.test(filename)) { name=filename.replace(/\.[^.]+$/,'')+'.zip'; blob=new Blob([RS.makeZip([{name:filename,data:u8}])]); }
+    try { await dl.save({filename:name, data:blob}); toast('บันทึก '+name+' แล้ว'); }
+    catch(e){ if(e&&e.code!=='declined') toast('บันทึกไม่สำเร็จ: '+(e&&e.message||e)); }
+    return;
+  }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(isBlob?data:new Blob([u8])); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  toast('บันทึก '+filename+' แล้ว');
+}
+
+/* ---------- รอม ---------- */
+function workRom(){ if(!S.work){ S.work=new Uint8Array(S.orig); for(const p of S.patches) S.work.set(p.bytes,p.off); } return S.work; }
+const real=u8=>S.swap?RS.swap16(u8):u8;
+$('scSwap').onchange=()=>{ const on=$('scSwap').checked; setRom(RS.swap16(S.orig),S.name,S.demo,on); };
+function setRom(u8, name, demo, swap){
+  S.swap=!!swap; $('scSwap').checked=S.swap;
+  S.orig=u8; S.name=name; S.demo=!!demo; S.entries=[]; S.patches=[]; S.gfx=[]; S.work=null; S.page=0;
+  S.crc=RS.crc32(real(u8)); const sys=S.sys=RS.detect(u8,name), ri=$('romInfo'); ri.innerHTML='';
+  const add=(k,v)=>{ const d=document.createElement('span'), b=document.createElement('b'); b.textContent=v; d.append(k+' ',b); ri.appendChild(d); };
+  const nm=document.createElement('span'); nm.className='name'; nm.textContent=(S.disc?S.disc.file.name+' › ':'')+name+' '; if(demo){ const t=document.createElement('span'); t.className='tag'; t.textContent='รอมตัวอย่าง ไม่ใช่เกมจริง'; nm.appendChild(t); } ri.appendChild(nm);
+  add('ระบบ',sys.label); add('CRC32',hex(S.crc,8)); add('ขนาด',fmtSize(u8.length)); if(sys.title) add('ชื่อในรอม',sys.title); if(sys.code) add('รหัส',sys.code);
+  $('sysNote').textContent=sys.note; $('sysNote').hidden=!sys.note;
+  $('scPtr').disabled=!sys.ptr; $('scPtr').checked=!!sys.ptr;
+  $('bdName').value=(S.disc?discBase():baseName())+' Thai (90S Game)';
+  $('cvTitle').value=demo?'ชื่อเกมภาษาไทย':(sys.title||(S.disc?discBase():baseName()));
+  const zip=S.disc&&S.disc.kind==='zip'; $('btnBps').hidden=!!S.disc&&!zip; $('btnPpf').hidden=!S.disc||zip; $('btnImg').hidden=!S.disc; $('btnImg').textContent=zip?'บันทึก .zip เกมที่แก้แล้ว':'บันทึกอิมเมจแผ่นภาษาไทย'; $('btnGba').textContent=S.disc?'บันทึกไฟล์ที่แก้แล้ว':'บันทึกรอมภาษาไทย';
+  $('tvOff').value='0'; $('gfBase').value=''; $('gfMsg').textContent=''; $('apMsg').textContent=''; tgClear(); doScan(true); drawTiles(); drawGlyphs(); drawCover();
+}
+/* ---------- แผ่นเกม (PS1 และแผ่น ISO อื่น) ---------- */
+const MEDIA=/\.(str|xa|vag|vb|vh|seq|sep|tim|bs|mov|iki|dps|pss|adx|int|ipu|wav|mp3|avi)$/i;
+function stash(){ if(!S.disc||!S.sub) return;
+  const th=S.entries.filter(e=>e.thai).map(e=>[e.off,e.thai]); let neu=null;
+  if(th.length||S.patches.length||S.gfx.length){ try{ neu=doBuild().rom; }catch(e){} }
+  S.disc.work.set(S.sub.path,{th,patches:S.patches,gfx:S.gfx,ptr:$('scPtr').checked,src:$('scSrc').value,old:real(S.orig),neu:neu&&real(neu),entry:S.sub}); }
+async function loadDiscFile(f){
+  if(!f.size) throw new Error('ไฟล์นี้ว่างเปล่า'); if(f.size>128*1048576) throw new Error('ไฟล์นี้ใหญ่เกิน 128MB น่าจะเป็นวิดีโอหรือเสียง ไม่ใช่ข้อความ');
+  stash(); const u8=(await S.disc.d.readFile(f)).slice(); S.sub=f; setRom(u8,f.path,false);
+  const w=S.disc.work.get(f.path);
+  if(w){ S.patches=w.patches; S.gfx=w.gfx; S.work=null; if($('scPtr').checked!==w.ptr||$('scSrc').value!==(w.src||'')){ $('scPtr').checked=w.ptr; $('scSrc').value=w.src||''; doScan(true); }
+    const by=new Map(S.entries.map(e=>[e.off,e])); for(const [o,t] of w.th){ const e=by.get(o); if(e) e.thai=t; } renderText(); tgDone(); }
+  renderDisc(); }
+function renderDisc(){ const q=$('discSearch').value.trim().toLowerCase(), all=$('discAll').checked, box=$('discList'); box.innerHTML='';
+  const list=S.disc.d.files.filter(f=>(all||!MEDIA.test(f.path))&&(!q||f.path.toLowerCase().includes(q))).slice(0,400);
+  for(const f of list){ const b=document.createElement('button'), w=S.disc.work.get(f.path), sm=document.createElement('small');
+    b.textContent=f.path; if(S.sub&&S.sub.path===f.path) b.className='cur';
+    sm.textContent=(f===S.disc.boot?'โปรแกรมหลัก · ':'')+(w&&(w.th.length||w.gfx.length)?'มีงานแปล · ':'')+fmtSize(f.size); b.appendChild(sm);
+    b.onclick=()=>loadDiscFile(f).catch(e=>toast(e.message,7000)); box.appendChild(b); }
+  if(!list.length) box.textContent='ไม่มีไฟล์ตรงกับที่ค้นหา'; }
+$('discSearch').oninput=()=>renderDisc(); $('discAll').onchange=()=>renderDisc();
+async function openAny(f){
+  const h=await readSlice(f,0,16), mg=String.fromCharCode.apply(null,h.subarray(0,8));
+  if(mg==='MComprHD') throw new Error('ไฟล์ .chd ต้องแปลงเป็น .bin/.cue ก่อน (ใช้ chdman extractcd) แล้วเปิดไฟล์ .bin');
+  if(mg.startsWith('CISO')||mg.startsWith('ZISO')) throw new Error('ไฟล์ .cso ต้องแปลงเป็น .iso ก่อนเปิด');
+  if(mg.startsWith('\0PBP')) throw new Error('ไฟล์ .pbp ต้องแปลงเป็น .bin หรือ .iso ก่อนเปิด');
+  if(/\.(cue|gdi|m3u|ccd|toc)$/i.test(f.name)) throw new Error('ไฟล์นี้เป็นแค่สารบัญของแผ่น ให้เลือกไฟล์ .bin หรือ .iso ของ Track 1 แทน');
+  if(mg.startsWith('PK\x03\x04')){ if(f.size>256*1048576) throw new Error('ไฟล์ .zip ใหญ่เกิน 256MB ให้แตกไฟล์ออกมาก่อน');
+    const z=await readFile(f), files=RS.zipList(z); if(!files.length) throw new Error('ไม่พบไฟล์ใน .zip นี้');
+    S.disc={kind:'zip',file:f,d:{files,readFile:x=>RS.zipRead(z,x)},work:new Map(),applied:new Map(),boot:null}; S.sub=null;
+    $('discBox').hidden=false; $('discHint').textContent='ไฟล์ '+f.name+' มี '+files.length+' ไฟล์ข้างใน เลือกไฟล์รอมที่จะแกะข้อความ ชุดรอมอาร์เคดมักเก็บโปรแกรมและข้อความไว้ในไฟล์ที่ชื่อมี p1, prg หรือ 68k ถ้าแกะไม่เจอให้ลองติ๊ก "สลับไบต์คู่" งานแปลของแต่ละไฟล์ถูกเก็บไว้ให้ระหว่างสลับไฟล์';
+    await loadDiscFile(files.slice().sort((a,b)=>b.size-a.size)[0]); toast('เปิด '+f.name+' แล้ว'); return; }
+  let disc=h[0]===0&&h[1]===0xFF&&h[10]===0xFF&&h[11]===0;
+  if(!disc&&f.size>=17*2048){ const p=await readSlice(f,16*2048+1,5); disc=String.fromCharCode.apply(null,p)==='CD001'; }
+  if(!disc){ if(f.size>256*1048576) throw new Error('ไฟล์นี้ใหญ่เกิน 256MB และไม่ใช่อิมเมจแผ่นที่อ่านได้');
+    S.disc=null; S.sub=null; $('discBox').hidden=true; setRom(await readFile(f),f.name,false); toast('เปิด '+f.name+' แล้ว'); return; }
+  const d=await RS.openDisc((o,n)=>readSlice(f,o,n),f.size); if(!d.files.length) throw new Error('ไม่พบไฟล์ในแผ่นนี้');
+  S.disc={kind:'iso',file:f,d,work:new Map(),applied:new Map(),boot:null}; S.sub=null;
+  const cnf=d.files.find(x=>/^SYSTEM\.CNF$/i.test(x.path));
+  if(cnf){ const m=/BOOT\d?\s*=\s*cdrom\d?:\\?([^;\r\n]+)/i.exec(text8(await d.readFile(cnf))); if(m){ const n=m[1].trim().replace(/\\/g,'/').toUpperCase(); S.disc.boot=d.files.find(x=>x.path.toUpperCase()===n)||null; } }
+  $('discBox').hidden=false; $('discHint').textContent='แผ่น '+(d.volume||f.name)+' มี '+d.files.length+' ไฟล์ ('+(d.raw?'อิมเมจ .bin 2352 ไบต์ต่อเซกเตอร์':'อิมเมจ .iso')+') เลือกไฟล์ที่จะแกะข้อความ เมนูและข้อความระบบมักอยู่ในโปรแกรมหลัก บทพูดมักอยู่ในไฟล์ข้อมูล งานแปลของแต่ละไฟล์ถูกเก็บไว้ให้ระหว่างสลับไฟล์';
+  await loadDiscFile(S.disc.boot||d.files.find(x=>!MEDIA.test(x.path)&&x.size)||d.files[0]); toast('เปิดแผ่น '+f.name+' แล้ว'); }
+$('btnOpenRom').onclick=pick('fileRom', openAny);
+
+/* ---------- พจนานุกรมและคำแปลออฟไลน์ ---------- */
+const norm=s=>s.trim().toLowerCase().replace(/\s+/g,' ').replace(/[.!?:…。！？、,]+$/,'');
+function parseGloss(t){ const m=new Map(); for(const line of t.split(/\r?\n/)){ const i=line.search(/[=\t]/); if(i>0){ const k=norm(line.slice(0,i)), v=line.slice(i+1).trim(); if(k&&v) m.set(k,v); } } return m; }
+const G={builtin:new Map(), user:new Map(), mem:new Map(), live:new Map()};
+{ const a=parseGloss(RS_DICT.words+'\n'+RS_DICT.en), b=parseGloss(RS_DICT.jp); for(const [k,v] of a) G.builtin.set(k,v); for(const [k,v] of b) G.builtin.set(k,v); $('glBuiltinLabel').textContent='ใช้พจนานุกรมในตัว (อังกฤษ '+a.size+' คำและประโยค ญี่ปุ่น '+b.size+' คำ)'; }
+/* แปลร่างแบบออฟไลน์: จับรูปประโยคที่พบบ่อย แล้วแปลคำต่อคำ สลับคำคุณศัพท์และคำแสดงความเป็นเจ้าของให้ตามแบบไทย */
+const VERB=new Set(RS_DICT.verbs.split(' ')), FUNC=new Set('of in on at for from with and or but if is are was were to you i he she we they it this that not'.split(' ')), thSp=t=>t.replace(/([\u0E00-\u0E7F])([A-Za-z0-9])/g,'$1 $2').replace(/([A-Za-z0-9])([\u0E00-\u0E7F])/g,'$1 $2');
+const ADJ=new Set(RS_DICT.adj.split(' ')), POSS=new Set(['my','your','his','her','our','their','its']), ART=new Set(['a','an','the','to','do','does','did','been','be']), BE=new Set(['is','are','am','was','were']);
+const word=k=>G.user.get(k)||($('glBuiltin').checked&&G.builtin.get(k))||'';
+function stem(w){ const c=[w]; if(w.endsWith("'s")) c.push(w.slice(0,-2)); if(w.endsWith('ies')) c.push(w.slice(0,-3)+'y'); if(w.endsWith('es')) c.push(w.slice(0,-2)); if(w.endsWith('s')) c.push(w.slice(0,-1));
+  if(w.endsWith('ed')){ c.push(w.slice(0,-2),w.slice(0,-1)); if(w.length>4&&w[w.length-3]===w[w.length-4]) c.push(w.slice(0,-3)); }
+  if(w.endsWith('ing')){ c.push(w.slice(0,-3),w.slice(0,-3)+'e'); if(w.length>5&&w[w.length-4]===w[w.length-5]) c.push(w.slice(0,-4)); }
+  for(const x of c){ const v=word(x); if(v) return [v,x]; } return null; }
+const PAT=[[/^you (?:got|found|obtained|received|picked up|get|find) (?:a |an |the |some )?(.+)$/i,'ได้รับ {1}'],[/^(?:got|obtained|received) (?:a |an |the |some )?(.+)$/i,'ได้รับ {1}'],[/^do you want to (.+)$/i,'ต้องการ{1}หรือไม่'],[/^would you like to (.+)$/i,'ต้องการ{1}หรือไม่'],
+  [/^press (\S+)(?: button)? to (.+)$/i,'กด {1} เพื่อ{2}'],[/^(.+) joined (?:the|your) party$/i,'{1} เข้าร่วมปาร์ตี้'],[/^(.+) learned (.+)$/i,'{1} เรียนรู้ {2}'],[/^not enough (.+)$/i,'{1}ไม่พอ'],[/^you (?:can't|cannot|can not) (.+)$/i,'ไม่สามารถ{1}ได้'],
+  [/^(.+) is locked$/i,'{1}ล็อกอยู่'],[/^(.+) (?:was|is|were|are) defeated$/i,'{1} พ่ายแพ้'],[/^(?:select|choose) (?:a |an |the |your )?(.+)$/i,'เลือก{1}'],[/^welcome to (?:the )?(.+)$/i,'ยินดีต้อนรับสู่ {1}'],[/^thank you for (.+)$/i,'ขอบคุณสำหรับ{1}'],
+  [/^there (?:is|are) no (.+)$/i,'ไม่มี{1}'],[/^no (.+) (?:left|found)$/i,'ไม่มี{1}'],[/^(.+) used (.+)$/i,'{1} ใช้ {2}'],[/^go to (?:the )?(.+)$/i,'ไปที่ {1}'],[/^return to (?:the )?(.+)$/i,'กลับไปที่ {1}'],[/^(?:talk|speak) to (.+)$/i,'คุยกับ {1}'],[/^find (?:the |a |an )?(.+)$/i,'ตามหา {1}'],[/^defeat (?:the |a |an |all )?(.+)$/i,'เอาชนะ {1}'],[/^collect (?:the |all )?(.+)$/i,'สะสม {1}'],[/^are you sure you want to (.+)$/i,'แน่ใจหรือไม่ว่าจะ{1}']];
+function draftPart(s){ s=s.trim(); if(!s) return {t:'',k:0,u:0}; const ex=word(norm(s)); if(ex) return {t:ex,k:1,u:0};
+  const tk=s.replace(/’/g,"'").match(/[A-Za-z][A-Za-z']*|\d+|[^A-Za-z\d\s]+/g)||[], out=[]; let k=0,u=0;
+  for(let i=0;i<tk.length;i++){ const w=tk[i]; if(!/^[A-Za-z]/.test(w)){ out.push({t:w,p:!/^\d/.test(w)}); continue; }
+    let hit=false; for(let n=4;n>=2&&!hit;n--){ if(i+n>tk.length) continue; const ph=tk.slice(i,i+n); if(!ph.every(x=>/^[A-Za-z]/.test(x))) continue; const v=word(ph.join(' ').toLowerCase()); if(v){ out.push({t:v}); k+=n; i+=n-1; hit=true; } }
+    if(hit) continue; const lw=w.toLowerCase();
+    if(BE.has(lw)){ const nx=(tk[i+1]||'').toLowerCase(); if(nx==='a'||nx==='an'||nx==='the') out.push({t:'คือ'}); k++; continue; }
+    if(ART.has(lw)){ k++; continue; }
+    const gen=lw.endsWith("'s")&&!word(lw), st=stem(lw);
+    if(st){ out.push({t:(gen?'ของ':'')+st[0],adj:ADJ.has(st[1]),poss:POSS.has(lw)||gen,verb:VERB.has(st[1]),fn:FUNC.has(lw),w:1}); k++; }
+    else { out.push({t:gen?'ของ '+w.slice(0,-2):w,raw:1,poss:gen,w:1}); if(!(w[0]!==lw[0])) u++; } }
+  const ws=out.filter(o=>o.w); if(ws.length>=2&&ws.length<=4&&ws.length===out.length&&!ws.some(o=>o.verb||o.fn||o.poss||o.adj)) out.reverse();
+  for(let i=0;i+1<out.length;i++){ const a=out[i], b=out[i+1]; if(a.adj&&b.w&&!b.adj&&!b.poss){ out[i]=b; out[i+1]=a; i++; } }
+  for(let i=0;i+1<out.length;i++){ const a=out[i]; if(a.poss&&out[i+1].w){ let j=i+1; if(out[j+1]&&out[j+1].adj) j++; out.splice(i,1); out.splice(j,0,a); i=j; } }
+  let t=''; for(const o of out){ const lat=o.raw||/^[\dA-Za-z]/.test(o.t); if(t&&!o.p&&(lat||/[A-Za-z\d,.!?:;]$/.test(t))) t+=' '; t+=o.t; }
+  return {t:thSp(t),k,u}; }
+function draftJP(s){ let t='',k=0,u=0; for(let i=0;i<s.length;){ let hit=false; for(let n=Math.min(10,s.length-i);n>=1&&!hit;n--){ const sub=s.substr(i,n); if(n===1&&/[\u3040-\u309f]/.test(sub)) break; const v=word(sub); if(v){ t+=v; k+=n; i+=n; hit=true; } }
+    if(hit) continue; const c=s[i++]; if(/[はをがにでともへのだよねか、。！？!?\s　…・「」]/.test(c)){ if(/[！？!?…]/.test(c)) t+=c.replace('！','!').replace('？','?'); else if(/[、\s　]/.test(c)) t+=' '; } else { u++; t+=c; } }
+  return k&&!u?t.trim():''; }
+function draft(e){ const m=/((?:<[0-9A-Fa-f]{2}>|\\|\s)*)$/.exec(e.text), suf=m[1], body=e.text.slice(0,e.text.length-suf.length); if(!body) return '';
+  if(/[\u3040-\u30ff\u4e00-\u9fff]/.test(body)){ const r=body.split('\n').map(draftJP); return r.every(x=>x)?r.join('\n')+suf:''; }
+  if(!/[A-Za-z]{2}/.test(body)) return ''; let K=0,U=0;
+  const one=line=>{ const pm=/[.!?:…]+$/.exec(line.trim()), core=line.trim().replace(/[.!?:…]+$/,''); for(const [re,tpl] of PAT){ const x=re.exec(core); if(x){ let t=tpl; for(let i=1;i<x.length;i++){ const r=draftPart(x[i]); K+=r.k+1; U+=r.u; t=t.replace('{'+i+'}',r.t); } return thSp(t)+(pm?pm[0]:''); } }
+    const r=draftPart(line); K+=r.k; U+=r.u; return r.t; };
+  const out=body.split('\n').map(one).join('\n'); return K>0&&U<=K*0.5?out+suf:''; }
+$('btnDraft').onclick=()=>{ liveMem(); let n=0,d=0; for(const e of (S.shown||[])) if(!e.thai){ const s=suggest(e); if(s){ e.thai=s; n++; } else { const r=draft(e); if(r){ e.thai=r; d++; } } }
+  renderText(); toast(n+d?'เติมให้ '+(n+d)+' ข้อความ ('+d+' ข้อความเป็นร่างคำต่อคำ ต้องอ่านและแก้ให้เป็นประโยคก่อนใช้)':'หน้านี้ไม่มีข้อความที่ร่างได้ เพิ่มคำในแท็บพจนานุกรม',9000); };
+function liveMem(){ G.live=new Map(); for(const e of S.entries) if(e.thai){ G.live.set(e.text,e.thai); const k=norm(e.text); if(!G.live.has('~'+k)) G.live.set('~'+k,e.thai); } }
+function suggest(e){ const same=G.live.get(e.text); if(same) return same;
+  const m=/((?:<[0-9A-Fa-f]{2}>|\\|\s)*)$/.exec(e.text), suf=m[1], core=e.text.slice(0,e.text.length-suf.length), k=norm(core); if(!k) return '';
+  const v=G.live.get('~'+k)||G.mem.get(k)||G.user.get(k)||($('glBuiltin').checked&&G.builtin.get(k))||''; if(!v) return '';
+  const pm=/[.!?:…。！？]+$/.exec(core.trim()), p=pm&&!/[.!?:…]$/.test(v)?pm[0].replace(/。/g,'.').replace(/！/g,'!').replace(/？/g,'?'):''; return v+p+suf; }
+function terms(text){ const out=[], low=' '+text.toLowerCase().replace(/[^a-z0-9\u00c0-\uffff]+/g,' ')+' ';
+  const scan=map=>{ for(const [k,v] of map){ if(out.length>=4) return; if(k.length<2) continue; const hit=/^[\x00-\x7f]+$/.test(k)?(k.length>2&&low.includes(' '+k+' ')):text.toLowerCase().includes(k); if(hit&&!out.some(o=>o[0]===k)) out.push([k,v]); } };
+  scan(G.user); if($('glBuiltin').checked) scan(G.builtin); return out; }
+$('btnFill').onclick=()=>{ liveMem(); let n=0; for(let pass=0;pass<2;pass++) for(const e of S.entries) if(!e.thai){ const s=suggest(e); if(s){ e.thai=s; n++; G.live.set(e.text,s); } }
+  renderText(); toast(n?'เติมคำแปลให้ '+n+' ข้อความ ตรวจความยาวและความหมายอีกครั้ง':'ไม่มีข้อความที่ตรงกับพจนานุกรมหรืองานเก่า เพิ่มคำในแท็บพจนานุกรมได้',6000); };
+$('btnGlApply').onclick=()=>{ G.user=parseGloss($('glText').value); $('glMsg').className='msg ok'; $('glMsg').textContent='ใช้พจนานุกรมแล้ว '+G.user.size+' คำ'; renderText(); };
+$('glBuiltin').onchange=()=>renderText();
+$('btnGlSave').onclick=()=>save('พจนานุกรม 90S Game.txt',$('glText').value||' ');
+$('btnGlOpen').onclick=pick('fileGl', async f=>{ let t=text8(await readFile(f)); if(/\.csv$/i.test(f.name)) t=RS.parseCsv(t).filter(r=>r.length>=2).map(r=>r[0]+'='+r[1]).join('\n'); $('glText').value=t; $('btnGlApply').click(); });
+const memShow=()=>{ $('memMsg').textContent=G.mem.size?'จำไว้ '+G.mem.size+' ข้อความ':'ยังไม่ได้นำเข้างานเก่า'; };
+$('btnMemIn').onclick=pick('fileMem', async f=>{ const t=text8(await readFile(f)); let n=0;
+  if(/\.json$/i.test(f.name)){ const p=JSON.parse(t); for(const x of (p.entries||[])) if(x.t&&x.th){ G.mem.set(norm(x.t),x.th); n++; } for(const x of (p.mem||[])){ G.mem.set(x[0],x[1]); n++; } if(!n) throw new Error('งานแปลไฟล์นี้บันทึกจากรุ่นเก่าที่ไม่ได้เก็บข้อความต้นฉบับ ให้ใช้ไฟล์ CSV แทน'); }
+  else for(const r of RS.parseCsv(t)){ if(r.length>=5&&r[3]&&r[4]&&r[0]!=='offset'){ G.mem.set(norm(r[3]),r[4]); n++; } else if(r.length===2&&r[0]&&r[1]){ G.mem.set(norm(r[0]),r[1]); n++; } }
+  memShow(); renderText(); toast('นำเข้า '+n+' ข้อความ'); });
+$('btnMemClear').onclick=()=>{ G.mem.clear(); memShow(); renderText(); }; memShow();
+
+/* ---------- ข้อความ ---------- */
+function srcTable(){ const v=$('scSrc').value; if(!v) return S.table; if(!S.jp||S.jp.enc!==v) S.jp={enc:v,table:RS.makeTable(RS.jpPairs(v))}; return S.jp.table; }
+$('scSrc').onchange=()=>{ $('scAscii').disabled=!!$('scSrc').value; doScan(false); };
+function doScan(quiet){
+  const term=parseHex($('scTerm').value); if(isNaN(term)||term>255){ toast('ไบต์ปิดข้อความต้องเป็น hex 2 หลัก เช่น 00 หรือ FF'); return; }
+  S.term=term;
+  const old=new Map(S.entries.filter(e=>e.thai).map(e=>[e.off,e.thai]));
+  const src=$('scSrc').value, jp=!!src, wide=/^(shift_jis|euc-jp|gbk|big5|euc-kr)$/.test(src);
+  const r=RS.scan(S.orig,{table:srcTable(),multi:wide,needKana:src==='shift_jis'||src==='euc-jp',minWide:wide&&!/jp|jis/.test(src)?3:0,ptr:S.sys.ptr,term,minLen:+$('scMin').value||4,minRatio:+$('scRatio').value,asciiOnly:!jp&&$('scAscii').checked,needPtr:$('scPtr').checked});
+  for(const e of r.entries) if(old.has(e.off)) e.thai=old.get(e.off);
+  S.entries=r.entries; S.page=0; renderText();
+  if(!quiet) toast(r.entries.length?('พบ '+r.entries.length+' ข้อความ'+(r.truncated?' (ตัดที่จำนวนสูงสุด ลองเพิ่มความเข้มงวด)':'')):'ไม่พบข้อความ ลองเอาตัวเลือก "เฉพาะที่มีพอยน์เตอร์" ออก หรือไปหาการเข้ารหัสในแท็บตารางอักษร', 7000);
+}
+$('btnScan').onclick=()=>doScan(false);
+function pillFor(e){
+  const c=RS.checkEntry(e,S.table), n=c.bytes?c.bytes.length:0;
+  if(c.status==='empty') return ['no','ยังไม่แปล'];
+  if(c.status==='inplace') return ['ok','ลงที่เดิม '+n+'/'+e.slot+' ไบต์'];
+  if(c.status==='move') return ['mv','ยาวกว่าเดิม จะย้ายที่และแก้พอยน์เตอร์ ('+n+' ไบต์)'];
+  if(c.status==='toolong') return ['bad','ยาวเกิน '+n+'/'+e.slot+' ไบต์ และไม่มีพอยน์เตอร์ให้ย้าย'];
+  return ['bad','อักษรที่ไม่มีในตาราง: '+c.bad.join(' ')];
+}
+function filtered(){
+  const q=$('txSearch').value.trim().toLowerCase(), f=$('txFilter').value;
+  return S.entries.filter(e=>{
+    if(q && !e.text.toLowerCase().includes(q) && !e.thai.toLowerCase().includes(q)) return false;
+    if(f==='todo') return !e.thai; if(f==='done') return !!e.thai;
+    if(f==='bad') return pillFor(e)[0]==='bad';
+    return true;
+  });
+}
+function renderStats(){
+  let done=0,bad=0; for(const e of S.entries){ if(e.thai){ done++; if(pillFor(e)[0]==='bad') bad++; } }
+  $('txStats').innerHTML='<span>ข้อความ <b>'+S.entries.length+'</b></span><span>แปลแล้ว <b>'+done+'</b></span><span>มีปัญหา <b style="color:'+(bad?'var(--bad)':'inherit')+'">'+bad+'</b></span>';
+}
+function renderText(){
+  const list=filtered(), pages=Math.max(1,Math.ceil(list.length/PER)); if(S.page>=pages) S.page=pages-1;
+  const box=$('txList'); box.innerHTML=''; liveMem();
+  if(!list.length){ box.innerHTML='<p class="hint">'+(S.entries.length?'ไม่มีข้อความตรงกับตัวกรอง':'ยังไม่มีข้อความ กด "แกะข้อความ" ด้านบน')+'</p>'; }
+  S.shown=list.slice(S.page*PER,(S.page+1)*PER);
+  for(const e of S.shown){
+    const row=document.createElement('div'); row.className='entry';
+    const meta=document.createElement('div'); meta.className='meta'; meta.innerHTML='<b>0x'+hex(e.off,6)+'</b><br>'+e.slot+' ไบต์ · '+(e.ptrs.length?e.ptrs.length+' พอยน์เตอร์':'ไม่มีพอยน์เตอร์');
+    const pre=document.createElement('pre'); pre.textContent=e.text;
+    const right=document.createElement('div'); const ta=document.createElement('textarea'); ta.id='th_'+e.off; ta.value=e.thai; ta.placeholder='คำแปลภาษาไทย'; ta.rows=Math.max(2,e.text.split('\n').length); ta.setAttribute('aria-label','คำแปลของ '+e.text.slice(0,30));
+    const pill=document.createElement('span'); const setP=()=>{ const [c,t]=pillFor(e); pill.className='pill '+c; pill.textContent=t; }; setP();
+    ta.oninput=()=>{ e.thai=ta.value; setP(); renderStats(); };
+    right.append(ta,pill);
+    if(!e.thai){ const sg=suggest(e), tm=sg?[]:terms(e.text), ex=document.createElement('div'); ex.style.cssText='margin-top:6px;font-size:13px;color:var(--muted)';
+      if(sg){ const b=document.createElement('button'); b.className='btn sm'; b.textContent='ใช้คำแปลนี้: '+sg.replace(/\n/g,' / ').slice(0,60); b.onclick=()=>{ ta.value=sg; e.thai=sg; setP(); renderStats(); ex.remove(); }; ex.appendChild(b); right.appendChild(ex); }
+      else { const dr=draft(e); if(dr){ const b=document.createElement('button'); b.className='btn sm'; b.textContent='ใช้ร่างคำต่อคำ: '+dr.replace(/\n/g,' / ').slice(0,70); b.onclick=()=>{ ta.value=dr; e.thai=dr; setP(); renderStats(); ex.remove(); ta.focus(); }; ex.appendChild(b); right.appendChild(ex); }
+        else if(tm.length){ ex.textContent='คำศัพท์: '+tm.map(x=>x[0]+' = '+x[1]).join(' · '); right.appendChild(ex); } } }
+    row.append(meta,pre,right); box.appendChild(row);
+  }
+  const pg=$('txPager'); pg.innerHTML='';
+  if(pages>1){ const b=(t,d)=>{ const x=document.createElement('button'); x.className='btn sm'; x.textContent=t; x.disabled=S.page+d<0||S.page+d>=pages; x.onclick=()=>{ S.page+=d; renderText(); $('txStats').scrollIntoView(); }; return x; };
+    const s=document.createElement('span'); s.textContent='หน้า '+(S.page+1)+' / '+pages; pg.append(b('◀ ก่อนหน้า',-1),s,b('ถัดไป ▶',1)); }
+  renderStats();
+}
+$('txSearch').oninput=()=>{ S.page=0; renderText(); }; $('txFilter').onchange=()=>{ S.page=0; renderText(); };
+$('btnCsvOut').onclick=()=>{ if(!S.entries.length) return toast('ยังไม่มีข้อความให้ส่งออก'); save(baseName()+' ข้อความ.csv', RS.toCsv([['offset','bytes','pointers','original','thai']].concat(S.entries.map(e=>['0x'+hex(e.off,6),e.slot,e.ptrs.length,e.text,e.thai])))); };
+$('btnCsvIn').onclick=pick('fileCsv', async f=>{
+  const rows=RS.parseCsv(text8(await readFile(f))), by=new Map(S.entries.map(e=>[e.off,e])); let n=0;
+  for(const r of rows){ const o=parseHex(r[0]||''); const e=by.get(o); if(e && r.length>=5){ e.thai=r[4]; if(r[4]) n++; } }
+  renderText(); toast('นำเข้าคำแปล '+n+' ข้อความ'+(n?'':' (offset ไม่ตรงกับข้อความที่แกะไว้ ตรวจว่าเปิดรอมและแกะด้วยค่าเดิม)'));
+});
+const store={get:k=>{ try{ return localStorage.getItem(k)||''; }catch(e){ return ''; } }, set:(k,v)=>{ try{ v?localStorage.setItem(k,v):localStorage.removeItem(k); }catch(e){} }};
+async function askApi(prompt){ const key=store.get('rs_key'); let res;
+  try{ res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:store.get('rs_model')||'claude-haiku-4-5-20251001',max_tokens:8000,messages:[{role:'user',content:prompt}]})}); }
+  catch(e){ throw new Error('ติดต่อ Claude ไม่ได้ ตรวจว่าเครื่องต่ออินเทอร์เน็ตอยู่'); }
+  const j=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(res.status===401?'API key ไม่ถูกต้อง กด "ตั้งค่า Claude" แล้วใส่ใหม่':res.status===429?'ใช้งานถี่เกินไปหรือเครดิตหมด รอสักครู่แล้วลองใหม่':'Claude ตอบกลับข้อผิดพลาด '+res.status+': '+((j.error&&j.error.message)||''));
+  const t=(j.content||[]).filter(c=>c.type==='text').map(c=>c.text).join(''), a=t.indexOf('['), b=t.lastIndexOf(']');
+  if(a<0||b<a) throw new Error('Claude ตอบกลับมาในรูปแบบที่อ่านไม่ได้ ลองกดใหม่'); return JSON.parse(t.slice(a,b+1)); }
+async function aiTranslate(ask){ const b=$('btnAi'), todo=(S.shown||[]).filter(e=>!e.thai).slice(0,50); if(!todo.length) return toast('หน้านี้แปลครบแล้ว ไปหน้าถัดไปแล้วกดอีกครั้ง');
+  b.disabled=true; b.textContent='กำลังแปล…';
+  try{
+    const prompt='แปลข้อความในเกมต่อไปนี้ (ต้นฉบับ: '+$('scSrc').selectedOptions[0].textContent+') เป็นภาษาไทยที่เป็นธรรมชาติและกระชับ เกมชื่อ "'+(S.sys.title||S.name)+'" ระบบ '+S.sys.label+'\nกติกา: คงจำนวนบรรทัด (\\n) เท่าเดิมเมื่อทำได้ แต่ละบรรทัดไม่ควรยาวกว่าต้นฉบับ คงแท็ก <XX> และสัญลักษณ์พิเศษท้ายข้อความ (เช่น \\ ) ไว้ตรงตำแหน่งเดิม ห้ามเพิ่มคำอธิบาย'+($('glText').value.trim()?'\nใช้คำแปลศัพท์เฉพาะตามนี้:\n'+$('glText').value.trim().slice(0,3000):'')+'\nตอบเป็น JSON array เท่านั้น รูปแบบ [{"i":0,"th":"..."}]\n\n'+JSON.stringify(todo.map((e,i)=>({i,en:e.text})));
+    const out=await ask(prompt); let n=0;
+    for(const r of (Array.isArray(out)?out:[])){ const e=todo[r.i]; if(e && typeof r.th==='string'){ e.thai=r.th; n++; } }
+    renderText(); toast('แปลให้ '+n+' ข้อความ ตรวจและแก้ได้เลย');
+  }catch(e){ toast('แปลไม่สำเร็จ: '+(e&&e.message||e),9000); }
+  b.disabled=false; b.textContent='ให้ Claude แปลหน้านี้'; }
+if(caps){ $('btnAi').hidden=true; caps.ai.then(ai=>{ if(!ai) return; $('btnAi').hidden=false; $('btnAi').onclick=()=>aiTranslate(pr=>ai.json(pr)); }); }
+else { const cfg=()=>{ $('aiBox').hidden=false; $('aiKey').value=store.get('rs_key'); $('aiModel').value=store.get('rs_model')||'claude-haiku-4-5-20251001'; $('aiBox').scrollIntoView({block:'center'}); };
+  $('btnAiCfg').hidden=false; $('btnAiCfg').onclick=cfg;
+  $('btnAi').onclick=()=>{ if(!store.get('rs_key')){ cfg(); $('aiMsg').className='msg warn'; $('aiMsg').textContent='ใส่ API key ก่อน แล้วกดปุ่มแปลอีกครั้ง'; return; } aiTranslate(askApi); };
+  $('btnAiSave').onclick=()=>{ const k=$('aiKey').value.trim(); if(!/^sk-ant-/.test(k)){ $('aiMsg').className='msg bad'; $('aiMsg').textContent='API key ต้องขึ้นต้นด้วย sk-ant-'; return; } store.set('rs_key',k); store.set('rs_model',$('aiModel').value); $('aiBox').hidden=true; toast('บันทึกแล้ว กด "ให้ Claude แปลหน้านี้" ได้เลย'); };
+  $('btnAiDel').onclick=()=>{ store.set('rs_key',''); $('aiKey').value=''; $('aiMsg').className='msg'; $('aiMsg').textContent='ลบคีย์ออกจากเครื่องนี้แล้ว'; }; }
+
+/* ---------- แปลออฟไลน์ด้วยโมเดล ---------- */
+const MT=window.RS_MT; let mtBusy=false, mtStop=false;
+const idb=(mode,fn)=>new Promise((res,rej)=>{ try{ const o=indexedDB.open('rs_mt',1); o.onupgradeneeded=()=>o.result.createObjectStore('f'); o.onerror=()=>rej(o.error); o.onsuccess=()=>{ try{ const tx=o.result.transaction('f',mode), rq=fn(tx.objectStore('f')); tx.oncomplete=()=>res(rq&&rq.result); tx.onerror=()=>rej(tx.error); tx.onabort=()=>rej(tx.error); }catch(e){ rej(e); } }; }catch(e){ rej(e); } });
+const mtMsg=(t,c)=>{ $('mtMsg').className='msg '+(c||''); $('mtMsg').textContent=t; };
+async function mtLoad(p){ mtMsg('กำลังเตรียมโมเดล ใช้เวลาสักครู่…'); await new Promise(r=>setTimeout(r,30)); await MT.load({enc:await p.enc.arrayBuffer(),dec:await p.dec.arrayBuffer(),wasm:await p.wasm.arrayBuffer(),tokA:p.tokA,tokB:p.tokB}); mtMsg('โมเดลพร้อมใช้','ok'); }
+function wrapLines(t,n){ if(n<=1||!t) return t; const target=Math.ceil(t.length/n), w=t.split(' ');
+  if(w.length>=n){ const L=[]; let cur=''; for(const x of w){ if(cur&&(cur+' '+x).length>target&&L.length<n-1){ L.push(cur); cur=x; } else cur=cur?cur+' '+x:x; } L.push(cur); return L.join('\n'); }
+  const L=[]; let a=0; for(let k=1;k<n;k++){ let b=Math.max(a+1,Math.round(t.length*k/n)); while(b<t.length&&(/[\u0E31\u0E33-\u0E3A\u0E47-\u0E4E]/.test(t[b])||/[เแโใไ]/.test(t[b-1]))) b++; L.push(t.slice(a,b)); a=b; } L.push(t.slice(a)); return L.filter(x=>x).join('\n'); }
+async function mtRun(){ const b=$('btnMt'); if(mtBusy){ mtStop=true; return; }
+  const rows=(S.shown||[]).filter(e=>!e.thai&&/[A-Za-z]{2}/.test(e.text)); if(!rows.length) return toast('หน้านี้ไม่มีข้อความอังกฤษที่ยังไม่แปล ไปหน้าถัดไปแล้วกดอีกครั้ง');
+  mtBusy=true; mtStop=false; liveMem(); let n=0, skip=0; const t0=Date.now();
+  try{ for(const e of rows){ if(mtStop) break; let th=suggest(e);
+      if(!th){ const m=/((?:<[0-9A-Fa-f]{2}>|\\|\s)*)$/.exec(e.text), suf=m[1], body=e.text.slice(0,e.text.length-suf.length), lines=body.split('\n'), one=lines.map(x=>x.trim()).join(' ').trim();
+        let t=one.split(/\s+/).length<=2?draft({text:one}):''; if(!t) t=await MT.translate(one);
+        const ph=one.match(/%[-+0-9.]*[a-zA-Z]|\{\d+\}|<[0-9A-Fa-f]{2}>/g)||[]; if(ph.some(x=>!t.includes(x))||/[^\u0E00-\u0E7F\x20-\x7E]/.test(t)||!t.trim()){ skip++; continue; }
+        th=wrapLines(t,lines.length)+suf; }
+      e.thai=th; n++; const ta=$('th_'+e.off); if(ta){ ta.value=th; ta.dispatchEvent(new Event('input')); } b.textContent='หยุดแปล ('+n+'/'+rows.length+')'; await new Promise(r=>setTimeout(r)); } }
+  catch(err){ toast('แปลไม่สำเร็จ: '+(err&&err.message||err),9000); }
+  mtBusy=false; b.textContent='แปลออฟไลน์ด้วยโมเดล'; renderText(); if(n||skip) toast('แปลออฟไลน์ให้ '+n+' ข้อความ ใช้เวลา '+Math.round((Date.now()-t0)/1000)+' วินาที'+(skip?' ข้าม '+skip+' ข้อความที่มีรหัสพิเศษหรือแปลออกมาไม่สมบูรณ์ ต้องแปลเอง':'')+' ตรวจและแก้ได้เลย',8000); }
+if($('ortsrc')&&MT){ $('btnMt').hidden=false;
+  const xhr=(u,t)=>new Promise((res,rej)=>{ const x=new XMLHttpRequest(); x.open('GET',u); x.responseType=t; x.onload=()=>(x.response&&(x.status===200||x.status===0))?res(x.response):rej(new Error(u)); x.onerror=()=>rej(new Error(u)); x.send(); });
+  async function mtAsset(){ if(!window.AndroidBridge) return false; let a; try{ a=await xhr('model/tok-src.json','text'); }catch(e){ return false; } if(!a||a.length<1000) return false;
+    $('mtBox').hidden=false; mtMsg('กำลังเตรียมโมเดลในแอป ใช้เวลาสักครู่…'); await new Promise(r=>setTimeout(r,50));
+    await MT.load({tokA:a,tokB:await xhr('model/tok-tgt.json','text'),wasm:await xhr('model/ort.wasm','arraybuffer'),enc:await xhr('model/enc.onnx','arraybuffer'),dec:await xhr('model/dec.onnx','arraybuffer')}); mtMsg('โมเดลพร้อมใช้','ok'); $('mtBox').hidden=true; return true; }
+  $('btnMt').onclick=async()=>{ if(MT.ready||mtBusy) return mtRun(); const b=$('btnMt'); b.disabled=true;
+    try{ if(await mtAsset()){ b.disabled=false; return mtRun(); } }catch(e){ b.disabled=false; $('mtBox').hidden=false; return mtMsg('เตรียมโมเดลในแอปไม่สำเร็จ เครื่องอาจมีหน่วยความจำไม่พอ: '+(e&&e.message||e),'bad'); }
+    try{ const p=await idb('readonly',s=>s.get('parts')).catch(()=>null); if(p&&p.enc){ $('mtBox').hidden=false; await mtLoad(p); $('mtBox').hidden=true; b.disabled=false; return mtRun(); } }catch(e){ mtMsg('โหลดโมเดลที่จำไว้ไม่สำเร็จ เลือกไฟล์ใหม่อีกครั้ง: '+(e&&e.message||e),'bad'); }
+    b.disabled=false; $('mtBox').hidden=false; $('mtBox').scrollIntoView({block:'center'}); };
+  $('mtPick').onclick=()=>$('fileMt').click(); $('mtClose').onclick=()=>{ $('mtBox').hidden=true; };
+  $('mtForget').onclick=async()=>{ await idb('readwrite',s=>s.delete('parts')).catch(()=>{}); mtMsg('ลบโมเดลที่จำไว้ออกจากเครื่องนี้แล้ว'); };
+  $('fileMt').onchange=async()=>{ const fs=[...$('fileMt').files]; $('fileMt').value=''; const f=re=>fs.find(x=>re.test(x.name)), toks=fs.filter(x=>/^tokenizer(?!_config).*\.json$/i.test(x.name));
+    const p={enc:f(/encoder.*\.onnx$/i),dec:f(/decoder.*\.onnx$/i),wasm:f(/threaded\.wasm$/i)||f(/\.wasm$/i)}, miss=[]; if(!p.enc) miss.push('encoder_model_quantized.onnx'); if(!p.dec) miss.push('decoder_model_merged_quantized.onnx'); if(!p.wasm) miss.push('ort-wasm-simd-threaded.wasm'); if(toks.length<2) miss.push('tokenizer.json ทั้งสองไฟล์');
+    if(miss.length) return mtMsg('ยังขาดไฟล์: '+miss.join(', ')+' เลือกทุกไฟล์ในโฟลเดอร์ model-en-th พร้อมกัน','bad');
+    try{ p.tokA=await toks[0].text(); p.tokB=await toks[1].text(); await mtLoad(p); idb('readwrite',s=>s.put(p,'parts')).then(()=>mtMsg('โมเดลพร้อมใช้ และจำไว้ในเครื่องนี้แล้ว','ok'),()=>mtMsg('โมเดลพร้อมใช้ แต่จำไว้ในเครื่องไม่ได้ ครั้งหน้าต้องเลือกไฟล์อีกครั้ง','warn')); mtRun(); }
+    catch(e){ mtMsg('เตรียมโมเดลไม่สำเร็จ: '+(e&&e.message||e),'bad'); } }; }
+
+/* ---------- Google Translate ---------- */
+const GT={rows:[]};
+function gtOpen(){ const todo=(S.shown||[]).filter(e=>!e.thai); if(!todo.length) return toast('หน้านี้แปลครบแล้ว ไปหน้าถัดไปแล้วกดอีกครั้ง');
+  let rows=[], text=''; for(const e of todo){ const line=e.text.replace(/\n/g,' ¶ '); if(rows.length&&encodeURIComponent(text+'\n'+line).length>5500) break; text+=(rows.length?'\n':'')+line; rows.push(e); }
+  GT.rows=rows; GT.text=text; $('gtBox').hidden=false; $('gtKey').value=store.get('rs_gkey'); $('gtPaste').value=''; $('gtMsg').textContent='';
+  const src={'shift_jis':'ja','euc-jp':'ja','gbk':'zh-CN','big5':'zh-TW','euc-kr':'ko','windows-1251':'ru'}[$('scSrc').value]||'auto';
+  $('gtLink').href='https://translate.google.com/?sl='+src+'&tl=th&op=translate&text='+encodeURIComponent(text);
+  $('gtInfo').textContent=rows.length+' ข้อความจากหน้านี้'+(rows.length<todo.length?' (ที่เหลือกดปุ่มอีกครั้งหลังใส่ชุดนี้)':''); $('gtBox').scrollIntoView({block:'center'}); }
+function gtFill(lines){ let n=0; GT.rows.forEach((e,i)=>{ const t=(lines[i]||'').trim(); if(t){ e.thai=t.replace(/\s*¶\s*/g,'\n'); n++; } }); renderText(); return n; }
+$('btnGt').onclick=()=>{ gtOpen(); if(store.get('rs_gkey')&&GT.rows.length) $('gtAuto').click(); };
+$('gtLink').onclick=ev=>{ if(window.AndroidBridge&&AndroidBridge.openUrl){ ev.preventDefault(); AndroidBridge.openUrl($('gtLink').href); } };
+$('gtCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(GT.text); toast('คัดลอกแล้ว นำไปวางใน Google Translate'); }catch(e){ $('gtPaste').value=GT.text; $('gtPaste').select(); toast('คัดลอกอัตโนมัติไม่ได้ ข้อความอยู่ในช่องด้านล่าง กดคัดลอกเอง'); } };
+$('gtApply').onclick=()=>{ const lines=$('gtPaste').value.replace(/\r/g,'').split('\n').filter((x,i,a)=>x.trim()||i<a.length-1), m=$('gtMsg'); if(!lines.join('').trim()){ m.className='msg bad'; m.textContent='ยังไม่ได้วางคำแปล'; return; }
+  const n=gtFill(lines); m.className='msg '+(lines.length===GT.rows.length?'ok':'warn'); m.textContent='ใส่คำแปล '+n+' ข้อความ'+(lines.length===GT.rows.length?'':' จำนวนบรรทัดที่วาง ('+lines.length+') ไม่เท่ากับต้นฉบับ ('+GT.rows.length+') ตรวจว่าคำแปลตรงข้อความ'); };
+$('gtClose').onclick=()=>{ $('gtBox').hidden=true; };
+$('gtSave').onclick=()=>{ store.set('rs_gkey',$('gtKey').value.trim()); toast($('gtKey').value.trim()?'บันทึกคีย์แล้ว':'ลบคีย์แล้ว'); };
+$('gtAuto').onclick=async()=>{ const key=$('gtKey').value.trim()||store.get('rs_gkey'), m=$('gtMsg'); if(!key){ m.className='msg bad'; m.textContent='ใส่ Google API key ก่อน หรือใช้แบบฟรีด้านบน'; return; } if(!GT.rows.length) return;
+  m.className='msg'; m.textContent='กำลังแปล…';
+  try{ let res; try{ res=await fetch('https://translation.googleapis.com/language/translate/v2?key='+encodeURIComponent(key),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({q:GT.rows.map(e=>e.text.replace(/\n/g,' ¶ ')),target:'th',format:'text'})}); }catch(e){ throw new Error('ติดต่อ Google ไม่ได้ ตรวจว่าเครื่องต่ออินเทอร์เน็ตอยู่'); }
+    const j=await res.json().catch(()=>({})); if(!res.ok) throw new Error((j.error&&j.error.message)||('Google ตอบกลับข้อผิดพลาด '+res.status));
+    const n=gtFill(j.data.translations.map(x=>x.translatedText)); m.className='msg ok'; m.textContent='แปลให้ '+n+' ข้อความ ตรวจและแก้ได้เลย'; }
+  catch(e){ m.className='msg bad'; m.textContent='แปลไม่สำเร็จ: '+e.message; } };
+
+/* ---------- งานแปล (โปรเจกต์) ---------- */
+const b64=u8=>{ let s=''; for(let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000)); return btoa(s); };
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+$('btnSaveProj').onclick=()=>save(baseName()+' งานแปล.json', JSON.stringify({app:'90S Thai ROM Studio',v:1,rom:{name:S.name,crc:hex(S.crc,8),size:S.orig.length},
+  scan:{src:$('scSrc').value,min:$('scMin').value,term:$('scTerm').value,ratio:$('scRatio').value,ascii:$('scAscii').checked,ptr:$('scPtr').checked},
+  tbl:RS.tblText(S.table), entries:S.entries.filter(e=>e.thai).map(e=>({o:e.off,t:e.text,th:e.thai})), gloss:$('glText').value, mem:[...G.mem], patches:S.patches.map(p=>({off:p.off,b:b64(p.bytes),font:!!p.font})), gfx:S.gfx.map(g=>({off:g.off,b:b64(g.bytes),origLen:g.origLen,ptrs:g.ptrs,kind:g.kind}))}));
+$('btnOpenProj').onclick=pick('fileProj', async f=>{
+  const p=JSON.parse(text8(await readFile(f))); if(!p.rom||!p.entries) throw new Error('ไฟล์นี้ไม่ใช่งานแปลของโปรแกรมนี้');
+  if(p.rom.crc!==hex(S.crc,8)) throw new Error('งานแปลนี้ทำกับรอม '+p.rom.name+' (CRC '+p.rom.crc+') เปิดรอมนั้นก่อน แล้วค่อยเปิดงานแปล');
+  S.table=RS.makeTable(RS.parseTbl(p.tbl).pairs); $('tblText').value=p.tbl; if(p.gloss!=null){ $('glText').value=p.gloss; G.user=parseGloss(p.gloss); } for(const x of (p.mem||[])) G.mem.set(x[0],x[1]); memShow();
+  $('scSrc').value=p.scan.src||''; $('scAscii').disabled=!!p.scan.src; $('scMin').value=p.scan.min; $('scTerm').value=p.scan.term; $('scRatio').value=p.scan.ratio; $('scAscii').checked=p.scan.ascii; $('scPtr').checked=p.scan.ptr&&!!S.sys.ptr;
+  S.patches=(p.patches||[]).map(x=>({off:x.off,bytes:unb64(x.b),font:x.font})); S.gfx=(p.gfx||[]).map(g=>({off:g.off,bytes:unb64(g.b),origLen:g.origLen,ptrs:g.ptrs,kind:g.kind})); tgDone(); S.work=null; S.entries=[]; doScan(true);
+  const by=new Map(S.entries.map(e=>[e.off,e])); let n=0; for(const x of p.entries){ const e=by.get(x.o); if(e){ e.thai=x.th; n++; } }
+  renderText(); drawTiles(); toast('เปิดงานแปลแล้ว '+n+' ข้อความ');
+});
+
+/* ---------- ตารางอักษร ---------- */
+$('tblText').value=RS.tblText(S.table);
+function applyTbl(txt){ const r=RS.parseTbl(txt); if(!r.pairs.length){ $('tblMsg').className='msg bad'; $('tblMsg').textContent='ตารางว่าง ต้องมีอย่างน้อยหนึ่งบรรทัดแบบ A1=ก'; return; }
+  S.table=RS.makeTable(r.pairs); for(const e of S.entries) e.text=RS.decode(S.orig,e.off,e.len,srcTable());
+  $('tblMsg').className='msg '+(r.errors.length?'warn':'ok'); $('tblMsg').textContent='ใช้ตารางแล้ว '+r.pairs.length+' คู่'+(r.errors.length?' · ข้ามบรรทัดที่อ่านไม่ได้: '+r.errors.slice(0,8).join(', '):''); renderText(); drawGlyphs(); }
+$('btnTblApply').onclick=()=>applyTbl($('tblText').value);
+$('btnTblReset').onclick=()=>{ $('tblText').value=RS.tblText(RS.makeTable(defaultPairs())); applyTbl($('tblText').value); };
+$('btnTblSave').onclick=()=>save(baseName()+'.tbl.txt',$('tblText').value);
+$('btnTblOpen').onclick=pick('fileTbl', async f=>{ $('tblText').value=text8(await readFile(f)); applyTbl($('tblText').value); });
+$('btnRel').onclick=()=>{
+  const w=$('relWord').value.trim(), out=$('relOut'); out.innerHTML='';
+  if(w.length<3||!/^([A-Z]+|[a-z]+)$/.test(w)){ out.className='msg bad'; out.textContent='พิมพ์คำอังกฤษตัวพิมพ์เดียวกันทั้งคำ อย่างน้อย 3 ตัว'; return; }
+  const res=RS.relativeSearch(S.orig,w,40); out.className='msg';
+  if(!res.length){ out.textContent='ไม่พบ ข้อความอาจถูกบีบอัดหรือเก็บเป็นรูปภาพ'; return; }
+  const ul=document.createElement('ul'); ul.className='list mono';
+  for(const r of res.slice(0,12)){ const li=document.createElement('li'); const a=(w[0]<'a'?65:97)+r.delta;
+    li.textContent='0x'+hex(r.off,6)+' · '+(r.delta===0?'เป็น ASCII ปกติ':'ตัว '+(w[0]<'a'?'A':'a')+' = ไบต์ '+hex(a&255))+' ';
+    if(r.delta!==0 && a>=0 && a+25<256){ const b=document.createElement('button'); b.className='btn sm'; b.textContent='สร้างตารางจากผลนี้'; b.onclick=()=>{
+      const up=w[0]<'a', lines=[]; for(let i=0;i<26;i++) lines.push(hex(a+i)+'='+String.fromCharCode((up?65:97)+i));
+      $('tblText').value=lines.join('\n')+'\n'+RS.tblText(RS.makeTable(RS.thaiPairs())); $('scAscii').checked=false; applyTbl($('tblText').value); toast('สร้างตารางแล้ว เติมอักษรที่เหลือ (ตัวเลข ช่องว่าง) แล้วกดแกะข้อความใหม่'); }; li.appendChild(b); }
+    ul.appendChild(li); }
+  out.append('พบ '+res.length+(res.length>=40?'+':'')+' ตำแหน่ง', ul);
+};
+
+/* ---------- ฟอนต์ ---------- */
+const TMAX={'1':1,'2n':3,'2g':3,'4':15,'4l':15,'8':255};
+function tv(){ const mode=$('tvBpp').value; let w=+$('tvW').value||8, h=+$('tvH').value||8;
+  if(mode!=='1'&&mode!=='4l'){ w=Math.max(8,Math.round(w/8)*8); h=Math.max(8,Math.round(h/8)*8); } if(mode==='4l') w+=w&1;
+  const bytes=mode==='1'?Math.ceil(w/8)*h:mode==='8'?w*h:(mode==='4'||mode==='4l')?w*h/2:w*h/4;
+  return {mode,max:TMAX[mode],w,h,cols:+$('tvCols').value||16,zoom:+$('tvZoom').value,lsb:$('tvLsb').checked,off:parseHex($('tvOff').value)||0,bytes,rows:Math.max(4,Math.floor(128/h))}; }
+function cellAt(p,x,y){ const t=(y>>3)*(p.w>>3)+(x>>3), yy=y&7, xx=x&7, bit=7-xx;
+  switch(p.mode){ case '1': return [y*Math.ceil(p.w/8)+(x>>3), p.lsb?xx:bit];
+    case '2n': return [t*16+yy, bit, t*16+8+yy]; case '2g': return [t*16+yy*2, bit, t*16+yy*2+1];
+    case '4': return [t*32+yy*4+(xx>>1), (x&1)*4]; case '4l': return [y*(p.w>>1)+(x>>1), (x&1)*4]; default: return [t*64+yy*8+xx, 0]; } }
+function getCell(rom,off,p){ const px=new Uint8Array(p.w*p.h);
+  for(let y=0;y<p.h;y++) for(let x=0;x<p.w;x++){ const a=cellAt(p,x,y), b=rom[off+a[0]]|0; let v;
+    if(p.mode==='1') v=b>>a[1]&1; else if(p.mode[0]==='2') v=(b>>a[1]&1)|((rom[off+a[2]]>>a[1]&1)<<1); else if(p.mode[0]==='4') v=b>>a[1]&15; else v=b;
+    px[y*p.w+x]=v; } return px; }
+function putCell(px,p){ const out=new Uint8Array(p.bytes);
+  for(let y=0;y<p.h;y++) for(let x=0;x<p.w;x++){ const a=cellAt(p,x,y), v=px[y*p.w+x];
+    if(p.mode==='1') out[a[0]]|=(v&1)<<a[1]; else if(p.mode[0]==='2'){ out[a[0]]|=(v&1)<<a[1]; out[a[2]]|=(v>>1&1)<<a[1]; } else if(p.mode[0]==='4') out[a[0]]|=(v&15)<<a[1]; else out[a[0]]=v; }
+  return out; }
+function shade(v,max){ if(v===0) return [5,4,15]; const g=Math.round(70+185*Math.min(v,max)/max); return [g,g,g]; }
+function paint(cv,cells,p,cols,zoom){ const rows=Math.ceil(cells.length/cols)||1, W=cols*p.w, H=rows*p.h, off=document.createElement('canvas'); off.width=W; off.height=H;
+  const c=off.getContext('2d'), im=c.createImageData(W,H);
+  cells.forEach((px,i)=>{ const cx=(i%cols)*p.w, cy=Math.floor(i/cols)*p.h; for(let y=0;y<p.h;y++) for(let x=0;x<p.w;x++){ const s=shade(px[y*p.w+x],p.max), o=((cy+y)*W+cx+x)*4; im.data[o]=s[0]; im.data[o+1]=s[1]; im.data[o+2]=s[2]; im.data[o+3]=255; } });
+  c.putImageData(im,0,0); cv.width=W*zoom; cv.height=H*zoom; const g=cv.getContext('2d'); g.imageSmoothingEnabled=false; g.drawImage(off,0,0,W*zoom,H*zoom); }
+function drawTiles(){ if(!S.orig) return; const p=tv(), rom=workRom(), cells=[]; for(let i=0;i<p.cols*p.rows;i++){ const o=p.off+i*p.bytes; if(o+p.bytes>rom.length) break; cells.push(getCell(rom,o,p)); } paint($('tileCv'),cells,p,p.cols,p.zoom); }
+['tvOff','tvBpp','tvW','tvH','tvCols','tvZoom','tvLsb'].forEach(id=>$(id).addEventListener('change',()=>{ drawTiles(); drawGlyphs(); }));
+const tvStep=d=>{ const p=tv(); let o=p.off+d*p.cols*p.rows*p.bytes; o=Math.max(0,Math.min(o,S.orig.length-p.bytes)); $('tvOff').value=hex(o,6); drawTiles(); };
+$('tvPrev').onclick=()=>tvStep(-1); $('tvNext').onclick=()=>tvStep(1);
+$('tileCv').onclick=ev=>{ const p=tv(), r=$('tileCv').getBoundingClientRect(), k=Math.floor((ev.clientY-r.top)/(p.h*p.zoom))*p.cols+Math.floor((ev.clientX-r.left)/(p.w*p.zoom)), o=p.off+k*p.bytes;
+  $('tvInfo').textContent='ช่องที่ '+k+' · ตำแหน่ง 0x'+hex(o,6)+' · ช่องละ '+p.bytes+' ไบต์'; };
+function thaiChars(){ return S.table.pairs.filter(([b,s])=>b.length===1 && /^[฀-๿]$/.test(s)); }
+function glyph(ch,p){ const c=document.createElement('canvas'); c.width=p.w; c.height=p.h; const g=c.getContext('2d',{willReadFrequently:true});
+  g.font=($('gfBold').checked?'bold ':'')+(+$('gfPx').value||8)+'px '+$('gfFam').value; g.fillStyle='#fff'; g.textBaseline='alphabetic';
+  const m=g.measureText(ch), L=m.actualBoundingBoxLeft, R=m.actualBoundingBoxRight; g.fillText(ch,Math.round((p.w-(L+R))/2+L),Math.round(p.h*0.78)+(+$('gfY').value||0));
+  const d=g.getImageData(0,0,p.w,p.h).data, px=new Uint8Array(p.w*p.h), fg=+$('gfFg').value|0, bg=+$('gfBg').value|0; for(let i=0;i<px.length;i++) px[i]=d[i*4+3]>110?fg:bg; return px; }
+function drawGlyphs(){ const p=tv(), cells=thaiChars().map(([,s])=>glyph(s,p)); paint($('glyphCv'),cells,p,Math.min(32,Math.max(8,Math.floor(384/(p.w*3))*2)),3); }
+['gfFam','gfPx','gfY','gfFg','gfBg','gfBold'].forEach(id=>$(id).addEventListener('input',drawGlyphs));
+$('btnGfWrite').onclick=()=>{ const p=tv(), base=parseHex($('gfBase').value), first=parseHex($('gfFirst').value), msg=$('gfMsg');
+  if(isNaN(base)||isNaN(first)){ msg.className='msg bad'; msg.textContent='ใส่ตำแหน่งฟอนต์และไบต์ตัวแรกเป็นเลข hex'; return; }
+  const add=[]; let skip=0; for(const [b,s] of thaiChars()){ const o=base+(b[0]-first)*p.bytes; if(b[0]<first||o+p.bytes>S.orig.length){ skip++; continue; } add.push({off:o,bytes:putCell(glyph(s,p),p),font:true}); }
+  S.patches=S.patches.filter(x=>!x.font).concat(add); S.work=null; drawTiles();
+  msg.className='msg '+(add.length?'ok':'bad'); msg.textContent=add.length?('เขียนอักษรไทย '+add.length+' ตัว ตั้งแต่ 0x'+hex(add[0].off,6)+(skip?' · ข้าม '+skip+' ตัวที่อยู่นอกขอบเขต':'')+' ดูผลในช่องด้านบนได้'):'ไม่มีตัวอักษรไหนลงได้ ตรวจตำแหน่งฟอนต์'; if(add.length){ $('tvOff').value=hex(add[0].off,6); drawTiles(); } };
+$('btnGfClear').onclick=()=>{ S.patches=S.patches.filter(x=>!x.font); S.work=null; drawTiles(); $('gfMsg').className='msg'; $('gfMsg').textContent='ลบฟอนต์ไทยที่เขียนไว้แล้ว'; };
+
+/* ---------- แพตช์ ---------- */
+function doBuild(){ const f=$('bdFree').value.trim(), free=f?parseHex(f):null; if(f&&isNaN(free)) throw new Error('ตำแหน่งที่ว่างต้องเป็นเลข hex');
+  return RS.build(S.orig,S.entries,S.table,{term:S.term,patches:S.patches,freeOff:free,ptr:S.sys.ptr,maxSize:S.sys.maxSize,fix:S.sys.fix,blobs:S.gfx}); }
+function renderBuild(){ const el=$('bdReport'); try{ const r=doBuild(), s=r.stats, n=s.inplace+s.moved, fonts=S.patches.filter(p=>p.font).length;
+    let h='<ul class="list"><li>ใส่คำแปลได้ <b>'+n+'</b> ข้อความ (ลงที่เดิม '+s.inplace+' · ย้ายที่ '+s.moved+' แก้พอยน์เตอร์ '+s.ptrs+' จุด)</li>';
+    if(fonts) h+='<li>ฟอนต์ไทย '+fonts+' ตัวอักษร</li>'; if(s.gfx) h+='<li>เครดิตในเกม '+s.gfx+' ภาพ'+(s.gfxMoved?' (ย้ายที่ '+s.gfxMoved+')':'')+'</li>';
+    if(r.freeStart!=null) h+='<li>ข้อมูลที่ย้ายอยู่ที่ <span class="mono">0x'+hex(r.freeStart,6)+'–0x'+hex(r.freeEnd,6)+'</span>'+(r.expanded?' · ขยายรอมเป็น '+(r.rom.length/1048576).toFixed(2)+' MB':'')+'</li>';
+    if(s.toolong+s.badchar) h+='<li style="color:var(--bad)">ข้าม '+(s.toolong+s.badchar)+' ข้อความที่มีปัญหา (ดูได้ที่แท็บข้อความ ตัวกรอง "มีปัญหา")</li>';
+    h+='</ul>'; if(!n&&!fonts&&!s.gfx) h='<p class="hint">ยังไม่มีคำแปล ไปพิมพ์คำแปลที่แท็บข้อความก่อน</p>'; el.className='msg'; el.innerHTML=h; return r;
+  }catch(e){ el.className='msg bad'; el.textContent=e.message; return null; } }
+const outName=()=>($('bdName').value.trim()||baseName()+' Thai').replace(/[\\/:*?"<>|]/g,'-');
+$('btnGba').onclick=()=>{ const r=renderBuild(); if(r) save(S.disc?S.name.replace(/^.*\//,''):outName()+(S.name.match(/\.[^.]+$/)||['.gba'])[0], real(r.rom)); };
+async function discRecs(){ if(!renderBuild()) return null; stash(); const recs=[]; let n=0;
+  for(const w of S.disc.work.values()){ if(!w.neu) continue; const rr=await RS.discRecords(S.disc.d,w.entry,w.old,w.neu); if(rr.length){ for(const x of rr) recs.push(x); n++; } }
+  if(!recs.length){ toast('ยังไม่มีอะไรเปลี่ยนในแผ่น พิมพ์คำแปลก่อน'); return null; } return {recs,n}; }
+const discExt=()=>(S.disc.file.name.match(/\.[^.]+$/)||['.bin'])[0];
+function composeDisc(recs){ const f=S.disc.file, parts=[]; let pos=0; for(const r of RS.mergeRecs(recs)){ if(r.off>f.size) break; parts.push(f.slice(pos,r.off)); for(const b of r.parts) parts.push(b); pos=r.off+r.len; } parts.push(f.slice(pos)); return new Blob(parts); }
+$('btnPpf').onclick=async()=>{ try{ const x=await discRecs(); if(!x) return; const f=S.disc.file, block=S.disc.d.raw&&f.size>=0x9720?await readSlice(f,0x9320,1024):null;
+  await save(outName()+'.ppf', RS.createPpf(x.recs,'Thai patch by 90S Game',block)); toast('บันทึกแพตช์ .ppf แล้ว รวม '+x.n+' ไฟล์ในแผ่น'); }catch(e){ toast(e.message,7000); } };
+async function composeZip(){ if(!renderBuild()) return; stash(); const files=[]; let n=0;
+  for(const f of S.disc.d.files){ const w=S.disc.work.get(f.path), a=S.disc.applied.get(f.path), d=(w&&w.neu)||a; if(d) n++; files.push({name:f.path,data:d||await S.disc.d.readFile(f)}); }
+  if(!n) return toast('ยังไม่มีไฟล์ไหนถูกแก้'); await save(outName()+'.zip', RS.makeZip(files)); }
+$('btnImg').onclick=async()=>{ try{ if(S.disc.kind==='zip') return await composeZip(); const x=await discRecs(); if(x) await save(outName()+discExt(), composeDisc(x.recs)); }catch(e){ toast(e.message,7000); } };
+$('btnBps').onclick=()=>{ const r=renderBuild(); if(!r) return; const bps=RS.createBps(real(S.orig),real(r.rom));
+  if(caps){ const how='วิธีแปะแพตช์ภาษาไทย (BPS)\r\n\r\n1. เตรียม ROM ต้นฉบับ: '+S.name+'  CRC32 '+hex(S.crc,8)+'\r\n2. เปิดโปรแกรม 90S Thai ROM Studio แท็บ "แพตช์" หรือเว็บ https://www.marcrobledo.com/RomPatcher.js/\r\n3. เลือก ROM ต้นฉบับ แล้วเลือกไฟล์ .bps\r\n4. จะได้ ROM ภาษาไทย นำไปเล่นได้เลย\r\n\r\nถ้าขึ้นว่า CRC ไม่ตรง แปลว่า ROM ต้นฉบับไม่ใช่รุ่นที่ถูกต้อง\r\n';
+    caps.dl.then(async dl=>{ if(!dl) return toast('หน้านี้บันทึกไฟล์ไม่ได้ ให้ใช้ไฟล์โปรแกรมในโฟลเดอร์ 90S แทน'); try{ await dl.save({filename:outName()+'.zip',data:new Blob([RS.makeZip([{name:outName()+'.bps',data:bps},{name:'วิธีแปะแพตช์.txt',data:new TextEncoder().encode(how)}])])}); toast('บันทึกแพตช์แล้ว'); }catch(e){ if(e&&e.code!=='declined') toast('บันทึกไม่สำเร็จ: '+(e&&e.message||e)); } });
+  } else save(outName()+'.bps',bps); };
+$('btnApply').onclick=pick('filePatch', async f=>{ const m=$('apMsg'), ign=$('apIgnore').checked; try{ const pb=await readFile(f), stem=f.name.replace(/\.[^.]+$/,'');
+    if(pb[0]===0x50&&pb[1]===0x50&&pb[2]===0x46){ const pp=RS.parsePpf(pb), same=b=>{ for(let i=0;i<1024;i++) if(b[i]!==pp.block[i]) return false; return true; };
+      if(S.disc&&S.disc.kind!=='zip'){ if(pp.block&&!ign&&!same(await readSlice(S.disc.file,0x9320,1024))) throw new Error('แผ่นนี้ไม่ตรงกับแผ่นที่ใช้ทำแพตช์ ถ้าแน่ใจให้ติ๊ก "แปะต่อแม้ CRC ไม่ตรง"');
+        if(caps) throw new Error('หน้าเว็บบันทึกอิมเมจแผ่นไม่ได้ ให้ใช้ไฟล์โปรแกรมในโฟลเดอร์ 90S แทน');
+        await save(stem+discExt(), composeDisc(pp.recs)); m.className='msg ok'; m.textContent='แปะแพตช์ลงแผ่นสำเร็จ แก้ '+pp.recs.length+' จุด'; }
+      else { const src=real(S.orig); if(pp.block&&!ign&&(src.length<0x9720||!same(src.subarray(0x9320,0x9720)))) throw new Error('ไฟล์นี้ไม่ตรงกับไฟล์ที่ใช้ทำแพตช์ ถ้าแน่ใจให้ติ๊ก "แปะต่อแม้ CRC ไม่ตรง"');
+        let size=src.length; for(const r of pp.recs) size=Math.max(size,r.off+r.bytes.length); const out=new Uint8Array(size); out.set(src); for(const r of pp.recs) out.set(r.bytes,r.off);
+        m.className='msg ok'; m.textContent='แปะสำเร็จ แก้ '+pp.recs.length+' จุด'; await save(stem+(S.name.match(/\.[^.]+$/)||['.bin'])[0], out); }
+      return; }
+    if(S.disc&&S.disc.kind!=='zip') throw new Error('แพตช์ .bps และ .ips ใช้กับไฟล์รอม ส่วนอิมเมจแผ่นใช้แพตช์ .ppf');
+    const out=RS.applyPatch(real(S.orig),pb,{ignoreCrc:ign});
+    if(S.disc){ S.disc.applied.set(S.sub.path,out); m.className='msg ok'; m.textContent='แปะลง '+S.sub.path+' สำเร็จ กด "บันทึก .zip เกมที่แก้แล้ว" เพื่อรวมกลับเป็นชุดรอม'; return; }
+    m.className='msg ok'; m.textContent='แปะสำเร็จ CRC32 ของผลลัพธ์ '+hex(RS.crc32(out),8); await save(stem+(S.name.match(/\.[^.]+$/)||['.gba'])[0], out);
+  }catch(e){ m.className='msg bad'; m.textContent=e.message; } });
+
+/* ---------- เครดิตในเกม ---------- */
+let TG={blocks:[],scanned:false,cur:null,base:null,data:null,on:false};
+function tgClear(){ TG={blocks:[],scanned:false,cur:null,base:null,data:null,on:false}; $('tgList').innerHTML='<option value="">ยังไม่ได้ค้นหา</option>'; $('tgMsg').textContent=''; $('tgOut').textContent=''; const c=$('tgCv'); c.width=480; c.height=64; tgDone(); }
+function tgGeo(){ const mode=$('tgMode').value; let w=+$('tgW').value||240; if(mode==='4t'||mode==='8t') w=Math.max(8,Math.round(w/8)*8); w+=w&1; const n=TG.base?TG.base.length:0;
+  const h=mode==='4t'?Math.floor(n/(w*4))*8:mode==='8t'?Math.floor(n/(w*8))*8:mode==='4l'?Math.floor(n/(w/2)):mode==='8l'?Math.floor(n/w):Math.floor(n/(w*2)); return {mode,w,h}; }
+function tgIdx(g,x,y){ const t=(y>>3)*(g.w>>3)+(x>>3); return g.mode==='4t'?t*32+(y&7)*4+((x&7)>>1):g.mode==='8t'?t*64+(y&7)*8+(x&7):g.mode==='4l'?y*(g.w>>1)+(x>>1):g.mode==='8l'?y*g.w+x:(y*g.w+x)*2; }
+function tgGet(d,g,x,y){ const i=tgIdx(g,x,y); return g.mode[0]==='4'?(d[i]>>((x&1)*4))&15:g.mode==='16'?d[i]|d[i+1]<<8:d[i]; }
+function tgSet(d,g,x,y,v){ const i=tgIdx(g,x,y); if(g.mode[0]==='4'){ const s=(x&1)*4; d[i]=(d[i]&~(15<<s))|((v&15)<<s); } else if(g.mode==='16'){ d[i]=v&255; d[i+1]=v>>8&255; } else d[i]=v; }
+const c555=v=>[(v&31)*255/31|0,(v>>5&31)*255/31|0,(v>>10&31)*255/31|0];
+function tgPal(g){ const n=g.mode[0]==='4'?16:256, t=$('tgPal').value.trim(), off=parseHex(t), rom=workRom(), pal=[];
+  for(let i=0;i<n;i++){ if(t&&!isNaN(off)&&off+n*2<=rom.length) pal.push(c555(rom[off+i*2]|rom[off+i*2+1]<<8)); else { const k=i?Math.round(45+210*i/(n-1)):0; pal.push(i?[k,k,k]:[5,4,15]); } } return pal; }
+function tgStamp(d,g){ const txt=$('tgText').value; if(!txt) return; const px=+$('tgPx').value||11, c=document.createElement('canvas'), x0=c.getContext('2d');
+  const font=($('tgBold').checked?'bold ':'')+px+'px '+$('tgFam').value; x0.font=font; const W=Math.ceil(x0.measureText(txt).width)+6, H=Math.ceil(px*2)+4; c.width=W; c.height=H;
+  const q=c.getContext('2d',{willReadFrequently:true}); q.font=font; q.fillStyle='#fff'; q.textBaseline='alphabetic'; q.fillText(txt,3,Math.round(px*1.3)+2);
+  const a=q.getImageData(0,0,W,H).data, on=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&a[(y*W+x)*4+3]>110, ox=+$('tgX').value|0, oy=+$('tgY').value|0, ol=+$('tgOl').value;
+  let fg=+$('tgFg').value|0, olv=ol; if(g.mode==='16'){ const h=$('tgRgb').value; fg=(parseInt(h.substr(1,2),16)>>3)|(parseInt(h.substr(3,2),16)>>3)<<5|(parseInt(h.substr(5,2),16)>>3)<<10; olv=0; }
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){ const X=ox+x, Y=oy+y; if(X<0||Y<0||X>=g.w||Y>=g.h) continue;
+    if(on(x,y)) tgSet(d,g,X,Y,fg); else if(ol>=0&&(on(x-1,y)||on(x+1,y)||on(x,y-1)||on(x,y+1)||on(x-1,y-1)||on(x+1,y+1)||on(x-1,y+1)||on(x+1,y-1))) tgSet(d,g,X,Y,olv); } }
+function tgRender(){ const cv=$('tgCv'); if(!TG.base) return; const g=tgGeo(), z=+$('tgZoom').value, d=TG.base.slice(); if(TG.on) tgStamp(d,g); TG.data=d;
+  if(g.h<1){ $('tgOut').className='msg warn'; $('tgOut').textContent='กว้างเกินขนาดข้อมูล ลดค่า "กว้าง"'; return; }
+  const pal=g.mode==='16'?null:tgPal(g), off=document.createElement('canvas'); off.width=g.w; off.height=g.h; const c=off.getContext('2d'), im=c.createImageData(g.w,g.h);
+  for(let y=0;y<g.h;y++) for(let x=0;x<g.w;x++){ const v=tgGet(d,g,x,y), s=pal?pal[v]:c555(v), o=(y*g.w+x)*4; im.data[o]=s[0]; im.data[o+1]=s[1]; im.data[o+2]=s[2]; im.data[o+3]=255; }
+  c.putImageData(im,0,0); cv.width=g.w*z; cv.height=g.h*z; const k=cv.getContext('2d'); k.imageSmoothingEnabled=false; k.drawImage(off,0,0,cv.width,cv.height);
+  const sw=$('tgSw'); sw.innerHTML=''; if(pal) pal.slice(0,g.mode[0]==='4'?16:64).forEach((p,i)=>{ const b=document.createElement('button'); b.style.background='rgb('+p.join(',')+')'; b.title='สีลำดับ '+i; b.setAttribute('aria-label','สีลำดับ '+i); if(i===(+$('tgFg').value|0)) b.className='on'; b.onclick=()=>{ $('tgFg').value=i; tgRender(); }; sw.appendChild(b); }); }
+function tgOpen(kind,off,len){ const done=S.gfx.find(g=>g.off===off&&g.kind===kind); let base, origLen;
+  if(kind==='lz'){ const r=RS.lzDecode(S.orig,off); if(!r) throw new Error('ถอดการบีบอัดที่ตำแหน่งนี้ไม่ได้'); origLen=r.clen; base=done?RS.lzDecode(done.bytes,0).data:r.data; }
+  else { if(isNaN(off)||isNaN(len)||len<16||off+len>S.orig.length) throw new Error('ตำแหน่งหรือความยาวไม่ถูกต้อง'); origLen=len; base=done?done.bytes.slice():S.orig.slice(off,off+len); }
+  TG.cur={kind,off,origLen,ptrs:kind==='lz'?RS.findPtrs(S.orig,off,S.sys.ptr):[]}; TG.base=base; TG.on=false;
+  if(kind==='lz'){ const n=base.length; $('tgMode').value=n===38400?'8l':n===76800?'16':'4t'; $('tgW').value=240; }
+  $('tgMsg').className='msg'; $('tgMsg').textContent='0x'+hex(off,6)+' · '+base.length+' ไบต์'+(kind==='lz'?' · พอยน์เตอร์ '+TG.cur.ptrs.length+' จุด':'')+(done?' · มีเครดิตที่ใส่ไว้แล้ว':''); $('tgOut').textContent=''; tgRender(); }
+function tgScan(){ const t=RS.lzScan(S.orig,0x400), sel=$('tgList'); TG.blocks=t; TG.scanned=true; sel.innerHTML='';
+  if(!t.length){ sel.innerHTML='<option value="">ไม่พบกราฟิกที่บีบอัดแบบ LZ77</option>'; $('tgMsg').className='msg warn'; $('tgMsg').textContent='ไฟล์นี้ไม่ได้บีบอัดแบบ LZ77 ใช้แท็บฟอนต์หาตำแหน่งภาพ แล้วใส่ตำแหน่งในช่อง "กราฟิกไม่บีบอัด"'; return; }
+  let first=-1; t.forEach((b,i)=>{ const o=document.createElement('option'), full=b.size===38400||b.size===76800||b.size===19200; if(full&&first<0) first=i; o.value=i; o.textContent='0x'+hex(b.off,6)+' · '+b.size+' ไบต์'+(full?' · น่าจะเป็นภาพเต็มจอ':''); sel.appendChild(o); });
+  sel.selectedIndex=Math.max(0,first); tgPick(); }
+function tgPick(){ const b=TG.blocks[+$('tgList').value]; if(b) try{ tgOpen('lz',b.off); }catch(e){ toast(e.message); } }
+$('tgScan').onclick=tgScan; $('tgList').onchange=tgPick;
+const tgStep=d=>{ const s=$('tgList'); if(!TG.blocks.length) return; s.selectedIndex=Math.max(0,Math.min(TG.blocks.length-1,s.selectedIndex+d)); tgPick(); };
+$('tgPrevB').onclick=()=>tgStep(-1); $('tgNextB').onclick=()=>tgStep(1);
+$('tgRawOpen').onclick=()=>{ try{ tgOpen('raw',parseHex($('tgRawOff').value),parseHex($('tgRawLen').value)); }catch(e){ $('tgMsg').className='msg bad'; $('tgMsg').textContent=e.message; } };
+['tgMode','tgW','tgZoom','tgPal','tgText','tgFam','tgPx','tgBold','tgFg','tgOl','tgRgb','tgX','tgY'].forEach(id=>$(id).addEventListener('input',tgRender));
+$('tgCv').onclick=ev=>{ if(!TG.base) return; const r=$('tgCv').getBoundingClientRect(), z=+$('tgZoom').value; $('tgX').value=Math.floor((ev.clientX-r.left)/z); $('tgY').value=Math.floor((ev.clientY-r.top)/z)-Math.round((+$('tgPx').value||11)*0.8); TG.on=true; tgRender(); };
+$('tgReset').onclick=()=>{ TG.on=false; tgRender(); };
+$('tgPng').onclick=()=>{ if(TG.base) $('tgCv').toBlob(async b=>save(baseName()+' เครดิต.png', new Uint8Array(await b.arrayBuffer())),'image/png'); };
+function tgDone(){ const ul=$('tgDone'); if(!ul) return; ul.innerHTML=''; for(const g of S.gfx){ const li=document.createElement('li'), b=document.createElement('button'); li.textContent='เครดิตที่ 0x'+hex(g.off,6)+' '+(g.bytes.length<=g.origLen?'(ลงที่เดิม) ':'(ย้ายที่ตอนสร้างรอม) '); b.className='btn sm'; b.textContent='เอาออก'; b.onclick=()=>{ S.gfx=S.gfx.filter(x=>x!==g); tgDone(); }; li.appendChild(b); ul.appendChild(li); } }
+$('tgCommit').onclick=()=>{ const o=$('tgOut'), c=TG.cur; if(!c){ o.className='msg bad'; o.textContent='เลือกภาพก่อน'; return; } if(!TG.on){ o.className='msg bad'; o.textContent='คลิกบนภาพตรงที่จะวางเครดิตก่อน'; return; }
+  const bytes=c.kind==='lz'?RS.lzEncode(TG.data):TG.data.slice(), fits=bytes.length<=c.origLen;
+  if(!fits&&!c.ptrs.length){ o.className='msg bad'; o.textContent='หลังบีบอัดใหญ่กว่าเดิม '+(bytes.length-c.origLen)+' ไบต์ และไม่มีพอยน์เตอร์ให้ย้าย ลองใช้ข้อความสั้นลง ตัวเล็กลง หรือไม่ใส่ขอบ'; return; }
+  S.gfx=S.gfx.filter(g=>!(g.off===c.off&&g.kind===c.kind)).concat([{off:c.off,bytes,origLen:c.origLen,ptrs:c.ptrs,kind:c.kind}]); tgDone();
+  o.className='msg ok'; o.textContent=fits?'ใส่เครดิตแล้ว ลงที่เดิมได้ ไปที่แท็บแพตช์เพื่อสร้างรอม':'ใส่เครดิตแล้ว ภาพใหญ่ขึ้น จะย้ายที่และแก้พอยน์เตอร์ '+c.ptrs.length+' จุดตอนสร้างรอม'; };
+
+/* ---------- ปกเกม ---------- */
+const CV={bg:null,logo:$('logoImg')};
+const loadImg=f=>new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=()=>rej(new Error('เปิดรูปนี้ไม่ได้')); i.src=URL.createObjectURL(f); });
+$('btnCvImg').onclick=pick('fileCvImg', async f=>{ CV.bg=await loadImg(f); drawCover(); });
+$('btnCvLogo').onclick=pick('fileCvLogo', async f=>{ CV.logo=await loadImg(f); drawCover(); });
+function fit(g,txt,maxW,size,weight){ do{ g.font=weight+' '+size+'px "Chakra Petch","Leelawadee UI",Tahoma,sans-serif'; size-=2; }while(g.measureText(txt).width>maxW&&size>10); return size+2; }
+function drawCover(){ const cv=$('coverCv'), [W,H]=$('cvSize').value.split('x').map(Number); cv.width=W; cv.height=H; const g=cv.getContext('2d'), u=Math.min(W,H)/100;
+  if(CV.bg){ const s=Math.max(W/CV.bg.width,H/CV.bg.height), w=CV.bg.width*s, h=CV.bg.height*s; g.imageSmoothingEnabled=s<3; g.drawImage(CV.bg,(W-w)/2,(H-h)/2,w,h); g.imageSmoothingEnabled=true; }
+  else { const gr=g.createLinearGradient(0,0,0,H); gr.addColorStop(0,'#1B1150'); gr.addColorStop(.55,'#3A1466'); gr.addColorStop(1,'#0D0B24'); g.fillStyle=gr; g.fillRect(0,0,W,H);
+    g.strokeStyle='rgba(47,216,255,.35)'; g.lineWidth=1; const hz=H*.58; for(let i=0;i<=12;i++){ const y=hz+(H-hz)*Math.pow(i/12,2); g.beginPath(); g.moveTo(0,y); g.lineTo(W,y); g.stroke(); } for(let i=-12;i<=12;i++){ g.beginPath(); g.moveTo(W/2+i*W/40,hz); g.lineTo(W/2+i*W/5,H); g.stroke(); }
+    const sun=g.createLinearGradient(0,hz-u*34,0,hz); sun.addColorStop(0,'#FFD23F'); sun.addColorStop(1,'#FF3D8B'); g.fillStyle=sun; g.beginPath(); g.arc(W/2,hz,u*26,Math.PI,0); g.fill(); }
+  const title=$('cvTitle').value.trim(), sub=$('cvSub').value.trim(), credit=$('cvCredit').value.trim(), style=$('cvStyle').value, pos=$('cvPos').value;
+  const barH=style==='bar'&&credit?Math.round(u*13):0;
+  if(title||sub){ const tS=fit(g,title||' ',W*.9,Math.round(u*15),'700'), sS=Math.round(tS*.45), block=tS*1.25+(sub?sS*1.5:0);
+    let top=pos==='top'?u*6+(style==='badge'?u*16:0):pos==='mid'?(H-barH-block)/2:H-barH-block-u*5;
+    if($('cvDim').checked){ const y0=Math.max(0,top-u*8), y1=Math.min(H,top+block+u*8), gr=g.createLinearGradient(0,y0,0,y1); gr.addColorStop(0,'rgba(8,6,24,0)'); gr.addColorStop(.3,'rgba(8,6,24,.78)'); gr.addColorStop(.7,'rgba(8,6,24,.78)'); gr.addColorStop(1,pos==='bot'?'rgba(8,6,24,.78)':'rgba(8,6,24,0)'); g.fillStyle=gr; g.fillRect(0,y0,W,(pos==='bot'?H-barH:y1)-y0); }
+    g.textAlign='center'; g.textBaseline='top'; g.lineJoin='round';
+    g.font='700 '+tS+'px "Chakra Petch","Leelawadee UI",Tahoma,sans-serif'; g.lineWidth=Math.max(3,tS*.16); g.strokeStyle='#0B0820'; g.strokeText(title,W/2,top); g.fillStyle=$('cvColor').value; g.fillText(title,W/2,top);
+    if(sub){ g.font='700 '+sS+'px "Chakra Petch","Leelawadee UI",Tahoma,sans-serif'; g.lineWidth=Math.max(2,sS*.18); g.strokeText(sub,W/2,top+tS*1.25); g.fillStyle='#2FD8FF'; g.fillText(sub,W/2,top+tS*1.25); } }
+  if(credit){ const logo=CV.logo&&(CV.logo.naturalWidth||CV.logo.width)?CV.logo:null; g.textBaseline='middle';
+    const disc=(x,y,r)=>{ if(!logo) return; g.save(); g.beginPath(); g.arc(x,y,r,0,7); g.clip(); g.drawImage(logo,x-r,y-r,r*2,r*2); g.restore(); g.strokeStyle='#2FD8FF'; g.lineWidth=Math.max(1.5,r*.07); g.beginPath(); g.arc(x,y,r,0,7); g.stroke(); };
+    if(style==='bar'){ g.fillStyle='#0B0820'; g.fillRect(0,H-barH,W,barH); g.fillStyle='#FF3D8B'; g.fillRect(0,H-barH,W,Math.max(2,u*.6));
+      const r=barH*.42, lx=u*3+r, cs=fit(g,credit,W-(logo?r*2+u*9:u*6),Math.round(barH*.42),'700'); disc(lx,H-barH/2+u*.3,r); g.textAlign='left'; g.fillStyle='#fff'; g.font='700 '+cs+'px "Chakra Petch","Leelawadee UI",Tahoma,sans-serif'; g.fillText(credit,logo?lx+r+u*3:u*3,H-barH/2+u*.5); }
+    else if(style==='badge'){ const r=u*7, cs=fit(g,credit,W*.6,Math.round(u*4.6),'700'), tw=g.measureText(credit).width, x=u*3, y=u*3, bw=(logo?r*2+u*2:u*3)+tw+u*4;
+      g.fillStyle='rgba(11,8,32,.88)'; g.beginPath(); g.roundRect?g.roundRect(x,y,bw,r*2,r):g.rect(x,y,bw,r*2); g.fill(); g.strokeStyle='#FF3D8B'; g.lineWidth=Math.max(1.5,u*.4); g.stroke(); disc(x+r,y+r,r*.9); g.textAlign='left'; g.fillStyle='#fff'; g.fillText(credit,x+(logo?r*2+u*2:u*3),y+r+u*.2); }
+    else { const cs=fit(g,credit,W*.9,Math.round(u*5),'700'); g.textAlign='center'; g.lineWidth=cs*.2; g.strokeStyle='#0B0820'; g.lineJoin='round'; g.strokeText(credit,W/2,H-u*5); g.fillStyle='#fff'; g.fillText(credit,W/2,H-u*5); } } }
+['cvSize','cvTitle','cvSub','cvCredit','cvPos','cvStyle','cvColor','cvDim'].forEach(id=>$(id).addEventListener('input',drawCover));
+$('btnCvSave').onclick=()=>$('coverCv').toBlob(async b=>save(($('cvTitle').value.trim()||'ปกเกม').replace(/[\\/:*?"<>|]/g,'-')+' ปก.png', new Uint8Array(await b.arrayBuffer())),'image/png');
+if(document.fonts&&document.fonts.load) document.fonts.load('700 40px "Chakra Petch"','ก').then(drawCover,()=>{});
+$('logoImg').addEventListener('load',drawCover);
+
+/* ---------- แท็บ ---------- */
+$('tabs').onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; for(const x of $('tabs').children){ const on=x===b; x.setAttribute('aria-selected',on); $('tab-'+x.dataset.t).hidden=!on; }
+  if(b.dataset.t==='patch') renderBuild(); if(b.dataset.t==='font'){ drawTiles(); drawGlyphs(); } if(b.dataset.t==='cover') drawCover(); if(b.dataset.t==='title'){ if(!TG.scanned) tgScan(); else tgRender(); } };
+
+/* ---------- เริ่มด้วยรอมตัวอย่าง ---------- */
+(function boot(){ const rom=RS.demoRom(), p={mode:'1',max:1,w:8,h:8,bytes:8,lsb:false}, c=document.createElement('canvas'); c.width=c.height=8; const g=c.getContext('2d',{willReadFrequently:true}); g.font='8px monospace'; g.fillStyle='#fff'; g.textBaseline='alphabetic';
+  for(let b=0x21;b<0x7F;b++){ g.clearRect(0,0,8,8); g.fillText(String.fromCharCode(b),1,7); const d=g.getImageData(0,0,8,8).data, px=new Uint8Array(64); for(let i=0;i<64;i++) px[i]=d[i*4+3]>110?1:0; rom.set(putCell(px,p),0x4000+(b-0x20)*8); }
+  { const g2={mode:'4t',w:240,h:32}, d=new Uint8Array(3840), k=document.createElement('canvas'); k.width=240; k.height=32; const q=k.getContext('2d',{willReadFrequently:true}); q.font='bold 18px sans-serif'; q.fillStyle='#fff'; q.textAlign='center'; q.fillText('THAI DEMO QUEST',120,22);
+    const a=q.getImageData(0,0,240,32).data; for(let y=0;y<32;y++) for(let x=0;x<240;x++) tgSet(d,g2,x,y,a[(y*240+x)*4+3]>110?9:(y>26?4:1)); rom.set(RS.lzEncode(d),0x6000); RS.put32(rom,0x840,RS.GBA_BASE+0x6000); }
+  setRom(rom,'รอมตัวอย่าง.gba',true); $('tvOff').value='4000'; $('gfBase').value='4000';
+  const demo={'NEW GAME':'เริ่มเกมใหม่','CONTINUE':'เล่นต่อ','Are you ready, hero?':'พร้อมหรือยัง ผู้กล้า?','You found a key.':'เจอกุญแจแล้ว'};
+  for(const e of S.entries) if(demo[e.text]) e.thai=demo[e.text]; renderText(); drawTiles(); })();
+})();
+</script>
