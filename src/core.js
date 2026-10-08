@@ -28,10 +28,10 @@
   function makeTable(pairs) {
     const t = { pairs: [], dec1: new Array(256), dec2: new Map(), lead: new Uint8Array(256), enc: new Map(), maxStr: 1 };
     for (const [bytes, str] of pairs) {
-      if (!str || !bytes.length || bytes.length > 2) continue;
+      if (!str || !bytes.length || bytes.length > 16) continue;
       t.pairs.push([bytes.slice(), str]);
       if (bytes.length === 1) { if (t.dec1[bytes[0]] === undefined) t.dec1[bytes[0]] = str; }
-      else { const k = bytes[0] << 8 | bytes[1]; if (!t.dec2.has(k)) t.dec2.set(k, str); t.lead[bytes[0]] = 1; }
+      else if (bytes.length === 2) { const k = bytes[0] << 8 | bytes[1]; if (!t.dec2.has(k)) t.dec2.set(k, str); t.lead[bytes[0]] = 1; }
       if (!t.enc.has(str)) t.enc.set(str, bytes.slice());
       if (str.length > t.maxStr) t.maxStr = str.length;
     }
@@ -41,9 +41,10 @@
     const pairs = [], errors = [];
     text.replace(/^\uFEFF/, '').split(/\r?\n/).forEach((line, n) => {
       if (!line.trim() || line[0] === '#' || line[0] === ';') return;
-      const m = /^\s*([0-9A-Fa-f]{2}|[0-9A-Fa-f]{4})=(.*)$/.exec(line);
+      // 1–2 ไบต์ใช้ทั้งแกะและใส่ ยาวกว่านั้น (ถึง 16 ไบต์) ใช้ตอนใส่คำแปลเท่านั้น เช่น สระ+วรรณยุกต์ที่ต้องเลือกรูปพิเศษ
+      const m = /^\s*((?:[0-9A-Fa-f]{2}){1,16})=(.*)$/.exec(line);
       if (!m) { errors.push(n + 1); return; }
-      const bytes = m[1].length === 2 ? [parseInt(m[1], 16)] : [parseInt(m[1].slice(0, 2), 16), parseInt(m[1].slice(2), 16)];
+      const bytes = m[1].match(/../g).map(h => parseInt(h, 16));
       let s = m[2].replace(/\\n/g, '\n');
       if (s === '') s = ' ';
       pairs.push([bytes, s]);
