@@ -254,6 +254,17 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
         <div id="relOut" class="msg"></div>
       </div>
     </div>
+    <div class="box">
+      <h2>Pokemon FireRed: ช่องฟอนต์ไทย 8x8</h2>
+      <p class="hint">สำหรับ Pokemon FireRed (รหัส BPRE) และแฮ็กที่ทำจาก FireRed US 1.0 เช่น Ultra Violet ปุ่มนี้จะแก้โค้ดแสดงข้อความของเกมให้มีช่องฟอนต์ 8x8 เพิ่ม 176 ช่อง (รหัส <span class="mono">F9 20</span>–<span class="mono">F9 CF</span>) พร้อมฟอนต์ไทยที่วาดไว้แล้ว สระและวรรณยุกต์ซ้อนบนพยัญชนะได้ ใช้ได้ทั้งบทพูดและเมนู แล้วโหลดตารางอักษรอังกฤษของเกมกับภาษาไทยให้ ตั้งไบต์ปิดข้อความเป็น FF และแกะข้อความใหม่ให้ทันที</p>
+      <p class="hint">ตัวไทย 1 ตัวใช้ 2 ไบต์ คำแปลส่วนใหญ่จะยาวกว่าเดิมและถูกย้ายไปที่ว่างโดยแก้พอยน์เตอร์ให้ ตารางจะเลือกรูปวรรณยุกต์ตัวสูงหรือต่ำ และรูปที่ชิดซ้ายบน ป ฝ ฟ ฬ ให้เอง ถ้ารอมมีแพตช์นี้อยู่แล้วจะโหลดแค่ตารางอักษร</p>
+      <div class="row">
+        <button class="btn pri" id="btnFr8">ใส่แพตช์ 8x8 และตารางภาษาไทย</button>
+        <button class="btn" id="btnFr8Tbl">โหลดแค่ตารางอักษร</button>
+        <button class="btn" id="btnFr8Off">เอาแพตช์ 8x8 ออก</button>
+      </div>
+      <div class="msg" id="fr8Msg"></div>
+    </div>
   </section>
 
   <!-- ฟอนต์ -->
@@ -735,13 +746,13 @@ const b64=u8=>{ let s=''; for(let i=0;i<u8.length;i+=0x8000) s+=String.fromCharC
 const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 $('btnSaveProj').onclick=()=>save(baseName()+' งานแปล.json', JSON.stringify({app:'90S Thai ROM Studio',v:1,rom:{name:S.name,crc:hex(S.crc,8),size:S.orig.length},
   scan:{src:$('scSrc').value,min:$('scMin').value,term:$('scTerm').value,ratio:$('scRatio').value,ascii:$('scAscii').checked,ptr:$('scPtr').checked},
-  tbl:RS.tblText(S.table), entries:S.entries.filter(e=>e.thai).map(e=>({o:e.off,t:e.text,th:e.thai})), gloss:$('glText').value, mem:[...G.mem], patches:S.patches.map(p=>({off:p.off,b:b64(p.bytes),font:!!p.font})), gfx:S.gfx.map(g=>({off:g.off,b:b64(g.bytes),origLen:g.origLen,ptrs:g.ptrs,kind:g.kind}))}));
+  tbl:RS.tblText(S.table), entries:S.entries.filter(e=>e.thai).map(e=>({o:e.off,t:e.text,th:e.thai})), gloss:$('glText').value, mem:[...G.mem], patches:S.patches.map(p=>({off:p.off,b:b64(p.bytes),font:!!p.font,fr8:!!p.fr8})), gfx:S.gfx.map(g=>({off:g.off,b:b64(g.bytes),origLen:g.origLen,ptrs:g.ptrs,kind:g.kind}))}));
 $('btnOpenProj').onclick=pick('fileProj', async f=>{
   const p=JSON.parse(text8(await readFile(f))); if(!p.rom||!p.entries) throw new Error('ไฟล์นี้ไม่ใช่งานแปลของโปรแกรมนี้');
   if(p.rom.crc!==hex(S.crc,8)) throw new Error('งานแปลนี้ทำกับรอม '+p.rom.name+' (CRC '+p.rom.crc+') เปิดรอมนั้นก่อน แล้วค่อยเปิดงานแปล');
   S.table=RS.makeTable(RS.parseTbl(p.tbl).pairs); $('tblText').value=p.tbl; if(p.gloss!=null){ $('glText').value=p.gloss; G.user=parseGloss(p.gloss); } for(const x of (p.mem||[])) G.mem.set(x[0],x[1]); memShow();
   $('scSrc').value=p.scan.src||''; $('scAscii').disabled=!!p.scan.src; $('scMin').value=p.scan.min; $('scTerm').value=p.scan.term; $('scRatio').value=p.scan.ratio; $('scAscii').checked=p.scan.ascii; $('scPtr').checked=p.scan.ptr&&!!S.sys.ptr;
-  S.patches=(p.patches||[]).map(x=>({off:x.off,bytes:unb64(x.b),font:x.font})); S.gfx=(p.gfx||[]).map(g=>({off:g.off,bytes:unb64(g.b),origLen:g.origLen,ptrs:g.ptrs,kind:g.kind})); tgDone(); S.work=null; S.entries=[]; doScan(true);
+  S.patches=(p.patches||[]).map(x=>({off:x.off,bytes:unb64(x.b),font:x.font,fr8:x.fr8})); S.gfx=(p.gfx||[]).map(g=>({off:g.off,bytes:unb64(g.b),origLen:g.origLen,ptrs:g.ptrs,kind:g.kind})); tgDone(); S.work=null; S.entries=[]; doScan(true);
   const by=new Map(S.entries.map(e=>[e.off,e])); let n=0; for(const x of p.entries){ const e=by.get(x.o); if(e){ e.thai=x.th; n++; } }
   renderText(); drawTiles(); toast('เปิดงานแปลแล้ว '+n+' ข้อความ');
 });
@@ -813,15 +824,27 @@ $('btnGfWrite').onclick=()=>{ const p=tv(), base=parseHex($('gfBase').value), fi
   msg.className='msg '+(add.length?'ok':'bad'); msg.textContent=add.length?('เขียนอักษรไทย '+add.length+' ตัว ตั้งแต่ 0x'+hex(add[0].off,6)+(skip?' · ข้าม '+skip+' ตัวที่อยู่นอกขอบเขต':'')+' ดูผลในช่องด้านบนได้'):'ไม่มีตัวอักษรไหนลงได้ ตรวจตำแหน่งฟอนต์'; if(add.length){ $('tvOff').value=hex(add[0].off,6); drawTiles(); } };
 $('btnGfClear').onclick=()=>{ S.patches=S.patches.filter(x=>!x.font); S.work=null; drawTiles(); $('gfMsg').className='msg'; $('gfMsg').textContent='ลบฟอนต์ไทยที่เขียนไว้แล้ว'; };
 
+/* ---------- Pokemon FireRed ช่องฟอนต์ 8x8 ---------- */
+function fr8Table(){ $('tblText').value=FR8.TBL; applyTbl(FR8.TBL); $('scTerm').value='FF'; $('scAscii').checked=false; $('scSrc').value=''; $('scAscii').disabled=false; doScan(false); }
+$('btnFr8').onclick=()=>{ const m=$('fr8Msg'); if(!S.orig||S.demo){ m.className='msg bad'; m.textContent='เปิดรอม Pokemon FireRed ก่อน'; return; }
+  const st=FR8.check(S.orig);
+  if(st==='patched'){ m.className='msg ok'; m.textContent='รอมนี้มีแพตช์ 8x8 อยู่แล้ว โหลดตารางอักษรให้แล้ว'; fr8Table(); return; }
+  if(st!=='ok'){ m.className='msg bad'; m.textContent=st; return; }
+  try{ const add=FR8.patches(S.orig).map(p=>({off:p.off,bytes:p.bytes,fr8:true})); S.patches=S.patches.filter(p=>!p.fr8).concat(add); S.work=null;
+    m.className='msg ok'; m.textContent='ใส่แพตช์แล้ว โค้ดและฟอนต์อยู่ที่ 0x'+hex(add[0].off,6)+'–0x'+hex(add[0].off+add[0].bytes.length,6)+' จะถูกเขียนลงรอมตอนบันทึกในแท็บแพตช์'; fr8Table(); }
+  catch(e){ m.className='msg bad'; m.textContent=e.message; } };
+$('btnFr8Tbl').onclick=()=>{ fr8Table(); $('fr8Msg').className='msg ok'; $('fr8Msg').textContent='โหลดตารางอักษร FireRed + ไทย 8x8 แล้ว'; };
+$('btnFr8Off').onclick=()=>{ S.patches=S.patches.filter(p=>!p.fr8); S.work=null; $('fr8Msg').className='msg'; $('fr8Msg').textContent='เอาแพตช์ 8x8 ออกแล้ว (ตารางอักษรยังเป็นแบบเดิม กด "คืนค่าเริ่มต้น" ถ้าต้องการ)'; };
+
 /* ---------- แพตช์ ---------- */
 function doBuild(){ const f=$('bdFree').value.trim(), free=f?parseHex(f):null; if(f&&isNaN(free)) throw new Error('ตำแหน่งที่ว่างต้องเป็นเลข hex');
   return RS.build(S.orig,S.entries,S.table,{term:S.term,patches:S.patches,freeOff:free,ptr:S.sys.ptr,maxSize:S.sys.maxSize,fix:S.sys.fix,blobs:S.gfx}); }
 function renderBuild(){ const el=$('bdReport'); try{ const r=doBuild(), s=r.stats, n=s.inplace+s.moved, fonts=S.patches.filter(p=>p.font).length;
     let h='<ul class="list"><li>ใส่คำแปลได้ <b>'+n+'</b> ข้อความ (ลงที่เดิม '+s.inplace+' · ย้ายที่ '+s.moved+' แก้พอยน์เตอร์ '+s.ptrs+' จุด)</li>';
-    if(fonts) h+='<li>ฟอนต์ไทย '+fonts+' ตัวอักษร</li>'; if(s.gfx) h+='<li>เครดิตในเกม '+s.gfx+' ภาพ'+(s.gfxMoved?' (ย้ายที่ '+s.gfxMoved+')':'')+'</li>';
+    if(fonts) h+='<li>ฟอนต์ไทย '+fonts+' ตัวอักษร</li>'; const f8=S.patches.find(p=>p.fr8&&p.bytes.length>0x1000); if(f8) h+='<li>แพตช์ช่องฟอนต์ไทย 8x8 (FireRed) ที่ <span class="mono">0x'+hex(f8.off,6)+'</span></li>'; if(s.gfx) h+='<li>เครดิตในเกม '+s.gfx+' ภาพ'+(s.gfxMoved?' (ย้ายที่ '+s.gfxMoved+')':'')+'</li>';
     if(r.freeStart!=null) h+='<li>ข้อมูลที่ย้ายอยู่ที่ <span class="mono">0x'+hex(r.freeStart,6)+'–0x'+hex(r.freeEnd,6)+'</span>'+(r.expanded?' · ขยายรอมเป็น '+(r.rom.length/1048576).toFixed(2)+' MB':'')+'</li>';
     if(s.toolong+s.badchar) h+='<li style="color:var(--bad)">ข้าม '+(s.toolong+s.badchar)+' ข้อความที่มีปัญหา (ดูได้ที่แท็บข้อความ ตัวกรอง "มีปัญหา")</li>';
-    h+='</ul>'; if(!n&&!fonts&&!s.gfx) h='<p class="hint">ยังไม่มีคำแปล ไปพิมพ์คำแปลที่แท็บข้อความก่อน</p>'; el.className='msg'; el.innerHTML=h; return r;
+    h+='</ul>'; if(!n&&!fonts&&!s.gfx&&!f8) h='<p class="hint">ยังไม่มีคำแปล ไปพิมพ์คำแปลที่แท็บข้อความก่อน</p>'; el.className='msg'; el.innerHTML=h; return r;
   }catch(e){ el.className='msg bad'; el.textContent=e.message; return null; } }
 const outName=()=>($('bdName').value.trim()||baseName()+' Thai').replace(/[\\/:*?"<>|]/g,'-');
 $('btnGba').onclick=()=>{ const r=renderBuild(); if(r) save(S.disc?S.name.replace(/^.*\//,''):outName()+(S.name.match(/\.[^.]+$/)||['.gba'])[0], real(r.rom)); };
