@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>คลังฟอนต์ไทย - 90S Game</title>
+<style>
+:root{--bg:#120a24;--panel:#1d1238;--line:#3a2a66;--text:#f1ecff;--mut:#b2a6d6;--acc:#29d8f0;--hot:#ff2e88;--ok:#7be38a;--box:#24407e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,"Noto Sans Thai",sans-serif}
+header{padding:16px;border-bottom:3px solid var(--hot);background:linear-gradient(90deg,#1d1238,#2a0f4a)}
+h1{margin:0;font-size:20px}header p{margin:4px 0 0;color:var(--mut);font-size:13px}
+main{max-width:1200px;margin:auto;padding:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{background:var(--panel);color:var(--text);border:1px solid var(--line);padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit}
+.tabs button.on{background:var(--acc);color:#001;border-color:var(--acc);font-weight:600}
+section{display:none;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+section.on{display:block}
+label{display:block;margin:10px 0 4px;color:var(--mut);font-size:13px}
+label.inl{display:inline-flex;align-items:center;gap:4px;margin:4px 12px 4px 0;color:var(--text)}
+input[type=text],input[type=number],textarea,select{width:100%;background:#0d0720;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit}
+textarea{min-height:70px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:150px}
+.btn{background:var(--hot);color:#fff;border:0;border-radius:8px;padding:9px 16px;font:inherit;font-weight:600;cursor:pointer;margin:12px 8px 0 0}
+.btn.alt{background:#3a2a66}
+.note{color:var(--mut);font-size:13px;margin:8px 0}
+.status{margin-top:10px;color:var(--ok);font-size:14px;white-space:pre-wrap}
+.warn{color:#ffb15c}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.card{background:#140c2a;border:1px solid var(--line);border-radius:8px;padding:10px;cursor:pointer}
+.card:hover,.card.on{border-color:var(--acc)}
+.card h3{margin:0 0 4px;font-size:15px;color:var(--acc);word-break:break-all}
+.card .t{font-size:13px}.card .m{font-size:12px;color:var(--mut)}
+.card canvas{display:block;margin-top:6px;image-rendering:pixelated;max-width:100%}
+.tag{display:inline-block;background:#2a1a52;border-radius:4px;padding:0 6px;margin:2px 2px 0 0;font-size:12px;color:var(--mut)}
+.tag.k{background:#3a1240;color:#ff9ac7}
+.glyphs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.g{background:#0d0720;border:1px solid var(--line);border-radius:6px;padding:3px 4px;text-align:center;font-size:12px;color:var(--mut)}
+.g canvas{display:block;image-rendering:pixelated;margin:2px auto 0}
+.tablewrap{max-height:420px;overflow:auto;margin-top:10px;border:1px solid var(--line);border-radius:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{position:sticky;top:0;background:#2a1a52}
+.prev{margin:10px 0 16px;padding:10px;background:#140c2a;border:1px solid var(--line);border-radius:8px}
+.prev h4{margin:0 0 6px;font-size:14px;color:var(--acc);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.prev h4 select{width:auto;padding:3px 6px;font-size:12px}
+.prev .cv{overflow-x:auto}
+.prev canvas{image-rendering:pixelated;display:block}
+.miss{color:#ffb15c;font-size:12px}
+code{background:#0d0720;padding:1px 5px;border-radius:4px;color:var(--acc)}
+.guide h3{color:var(--acc);margin:18px 0 6px}.guide li{margin:4px 0}
+pre{background:#0d0720;border:1px solid var(--line);border-radius:6px;padding:8px;overflow:auto;font-size:12px;white-space:pre-wrap;word-break:break-all}
+</style>
+</head>
+<body>
+<header>
+<h1>คลังฟอนต์ไทย (Thai Font DB)</h1>
+<p>ฟอนต์พิกเซลภาษาไทยทุกชุดที่เพจ 90S Game ใช้แปลเกมมาแล้ว ดูตัวอักษร ลองพิมพ์ประโยค แล้วส่งออกเป็นไทล์ไปใช้กับเกมใหม่ได้ ทำงานในเครื่องคุณเท่านั้น ไม่ต้องต่อเน็ต</p>
+</header>
+<main>
+<div class="tabs">
+<button class="on" data-t="t1">1. ดูชุดฟอนต์</button>
+<button data-t="t2">2. ลองพิมพ์ประโยค</button>
+<button data-t="t3">3. ส่งออกไทล์ + .tbl</button>
+<button data-t="t4">คู่มือ</button>
+</div>
+
+<section id="t1" class="on">
+<p class="note">กดการ์ดเพื่อดูตัวอักษรทั้งหมดของชุดนั้น เกมที่ใช้ และค่าที่ใช้ได้จริง (ความสูงบรรทัด ตำแหน่งสระ/วรรณยุกต์)</p>
+<div class="cards" id="cards"></div>
+<div id="detail"></div>
+</section>
+
+<section id="t2">
+<label>พิมพ์ประโยคภาษาไทย (ขึ้นบรรทัดใหม่ได้)</label>
+<textarea id="ptext">ที่นี่มีน้ำเย็นๆ ไหมครับ
+ปู่ฟื้นแล้ว ญี่ปุ่น ฎีกา กำลังจะไป</textarea>
+<div class="row">
+<div><label>ขนาดขยาย</label><select id="pscale"><option>2</option><option selected>3</option><option>4</option></select></div>
+<div><label>สีกล่องข้อความ</label><select id="pbg"><option value="#24407e">น้ำเงิน (แบบกล่องข้อความเกม)</option><option value="#0d0720">ดำ</option><option value="#f4f0e0">ขาว (หมึกดำ)</option></select></div>
+<div><label>แสดงชุด</label><select id="pwhich"><option value="all">ทุกชุด</option><option value="comp">เฉพาะชุดแบบประกอบ (ใช้ได้ทุกคำ)</option><option value="clus">เฉพาะชุดแบบคลัสเตอร์สำเร็จรูป</option></select></div>
+</div>
+<p class="note">ชุดแบบ "ประกอบ" วาดพยัญชนะแล้ววางสระ/วรรณยุกต์ตามกฎของชุดนั้น จึงพิมพ์ได้ทุกคำ ชุดแบบ "คลัสเตอร์" มีเฉพาะกลุ่มตัวอักษรที่เกมเคยใช้ ตัวที่ไม่มีจะขึ้นกรอบสีส้ม ในแต่ละชุดเลือก "โปรไฟล์เกม" เพื่อดูแบบที่เกมนั้นใช้จริง (ระยะสระ ตัวที่วาดใหม่ เงา/ขอบ)</p>
+<div id="previews"></div>
+</section>
+
+<section id="t3">
+<div class="row">
+<div><label>ชุดฟอนต์</label><select id="eset"></select></div>
+<div><label>โปรไฟล์เกม</label><select id="eprof"></select></div>
+<div><label>ความลึกสี</label><select id="ebpp"><option value="1">1bpp (2 สี)</option><option value="2" selected>2bpp (4 สี)</option><option value="4">4bpp (16 สี)</option></select></div>
+</div>
+<div class="row">
+<div><label>ส่งออกอะไร</label><select id="ewhat"><option value="glyphs">ตัวอักษรทุกตัวในชุด (พยัญชนะ สระ วรรณยุกต์แยกตัว)</option><option value="text">เฉพาะคลัสเตอร์ที่อยู่ในข้อความด้านล่าง (ประกอบสำเร็จ)</option><option value="inv">คลัสเตอร์ทั้งหมดที่เกมในโปรไฟล์เคยใช้</option></select></div>
+<div><label>รหัสเริ่มต้น (hex)</label><input type="text" id="estart" value="80"></div>
+<div><label>รูปแบบไฟล์ไทล์ .bin</label><select id="efmt"><option value="gba4">4bpp GBA (นิบเบิลล่าง = พิกเซลซ้าย)</option><option value="gb2">2bpp Game Boy (planar)</option><option value="lin2">2bpp linear (บิตล่าง = ซ้าย, GBA/NDS)</option><option value="1bpp">1bpp (บิตสูง = ซ้าย)</option></select></div>
+</div>
+<div class="row">
+<div><label>เอฟเฟกต์</label><select id="efx"><option value="profile">ตามโปรไฟล์เกม</option><option value="none">ไม่มี (หมึกอย่างเดียว)</option><option value="shadow-r">เงาขวา</option><option value="shadow-rb">เงาขวา-ล่าง</option><option value="outline-4">ขอบ 4 ทิศ</option><option value="outline-8">ขอบ 8 ทิศ</option></select></div>
+<div><label>สีในพาเลต</label><input type="text" id="epal" value="0=พื้น 1=หมึก 2=เงา/ขอบ 3=หมึกจาง" disabled></div>
+</div>
+<label>ข้อความ (ใช้กับ "เฉพาะคลัสเตอร์ในข้อความ" และใช้ลองเข้ารหัส)</label>
+<textarea id="etext">ที่นี่มีน้ำเย็นๆ ไหมครับ</textarea>
+<button class="btn" id="ego">สร้างไฟล์</button>
+<div class="status" id="est"></div>
+<div id="eout"></div>
+</section>
+
+<section id="t4" class="guide">
+<h3>คลังนี้คืออะไร</h3>
+<p>รวมฟอนต์ไทยแบบพิกเซลทุกชุดจากเกมที่เพจแปลแล้ว (ประมาณ 32 เกม) ดึงออกมาจากสคริปต์ของแต่ละเกมโดยตรง ชุดที่เหมือนกันรวมเป็นชุดเดียว ส่วนที่ต่างกันเล็กน้อย (เช่น วาด ใ ไ โ ใหม่ หรือขยับวรรณยุกต์ลง 1 พิกเซล) เก็บไว้เป็น "โปรไฟล์เกม" ของชุดนั้น</p>
+<h3>ชุดแบบประกอบ กับ ชุดแบบคลัสเตอร์</h3>
+<ul>
+<li><b>แบบประกอบ</b>: มีพยัญชนะ สระ วรรณยุกต์แยกตัว เกมวาดสระ/วรรณยุกต์ซ้อนบนพยัญชนะเอง ใช้กับคำไหนก็ได้ วรรณยุกต์มี 2 แบบ คือแบบปกติ และแบบ "สูง" (ป้ายสีชมพู hi) ใช้เมื่อมีสระบนอยู่ก่อน เช่น ที่ นี่ หรืออยู่หน้า ำ เช่น น้ำ</li>
+<li>พยัญชนะหางสูง ป ฝ ฟ ฬ จะเลื่อนสระบน/วรรณยุกต์ไปทางซ้าย (ค่า tallDx)</li>
+<li><b>แบบคลัสเตอร์</b>: แต่ละช่องคือพยัญชนะพร้อมสระ/วรรณยุกต์ที่ประกอบเสร็จแล้ว (มาจากฟอนต์ TTF) มีเฉพาะกลุ่มที่เกมเคยใช้ ถ้าคำใหม่มีกลุ่มที่ไม่มี ให้เลือกชุดแบบประกอบแทน</li>
+</ul>
+<h3>ส่งออกไปใช้กับเกมใหม่</h3>
+<ol>
+<li>ดูว่าฟอนต์อังกฤษในเกมสูงกี่พิกเซล แล้วเลือกชุดที่สูงใกล้เคียง (8x13 สำหรับฟอนต์เล็ก 8x16 สำหรับกล่องข้อความทั่วไป)</li>
+<li>แท็บ 3 เลือกชุด ความลึกสีให้ตรงกับเกม (GBA ส่วนใหญ่ 4bpp, Game Boy 2bpp) แล้วกดสร้างไฟล์</li>
+<li>ได้ไฟล์ PNG (ภาพไทล์ใช้กับโปรแกรมแก้ไทล์) ไฟล์ .bin (ไทล์ดิบ วางลงรอมได้เลย) ไฟล์ .tbl (ตารางรหัส ใช้กับเครื่องมือใส่คำแปล) และ .json (ความกว้างแต่ละตัว)</li>
+<li>ตัวที่เป็นสระ/วรรณยุกต์ (adv = 0) ต้องให้เกมวาดทับตัวก่อนหน้า ถ้าเกมทำไม่ได้ ให้เลือก "เฉพาะคลัสเตอร์ในข้อความ" เพื่อได้ตัวที่ประกอบเสร็จแล้ว 1 ช่องต่อ 1 กลุ่ม</li>
+</ol>
+<h3>สำหรับนักพัฒนา</h3>
+<p>ข้อมูลทั้งหมดอยู่ใน <code>db.js</code> (ตัวแปร <code>window.THAI_FONT_DB</code>) และ <code>db.json</code> รูปแบบอธิบายไว้ใน README.md แต่ละชุดมีโฟลเดอร์ของตัวเอง (glyphs.json + sheet.png)</p>
+</section>
+</main>
+<script>window.THAI_FONT_DB=parent.THAI_FONT_DB;
+document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[download]');if(!a||!parent.__rsSave)return;e.preventDefault();fetch(a.href).then(function(r){return r.blob()}).then(function(b){parent.__rsSave(a.download,b)})},true);</script>
+<script>
+'use strict';
+const DB = window.THAI_FONT_DB;
+const SETS = DB.sets;
+const $ = (id) => document.getElementById(id);
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('main > section').forEach(s => s.classList.toggle('on', s.id === b.dataset.t));
+  if (b.dataset.t === 't2') renderPreviews();
+});
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+
+// ---------------- Thai helpers (same rules as the Python builder) ----------------
+const UPPER = 'ัิีึื็ํ', TONES = '่้๊๋์', LOWER = 'ฺุู', OTHER = '๎', AM = 'ำ';
+const MARKS = UPPER + TONES + LOWER + OTHER;
+const ORDER = LOWER + UPPER + OTHER + TONES;
+const isMark = (c) => MARKS.includes(c);
+const isThai = (c) => c >= '฀' && c <= '๿';
+function canon(cl) {
+  let am = cl.endsWith(AM); if (am) cl = cl.slice(0, -1);
+  let b = '', m = cl;
+  if (cl && !isMark(cl[0])) { b = cl[0]; m = cl.slice(1); }
+  m = [...m].sort((x, y) => ORDER.indexOf(x) - ORDER.indexOf(y)).join('');
+  return b + m + (am ? AM : '');
+}
+// text -> tokens: {t:'thai', k:canonical cluster} | {t:'sp'} | {t:'other', c}
+function clusters(text, attach) {
+  const out = []; let cur = null;
+  const flush = () => { if (cur !== null) { out.push({t: 'thai', k: canon(cur)}); cur = null; } };
+  for (const ch of text) {
+    if (!isThai(ch)) { flush(); out.push(ch === ' ' ? {t: 'sp'} : {t: 'other', c: ch}); continue; }
+    if (isMark(ch)) { cur = (cur || '') + ch; continue; }
+    if (ch === AM) {
+      if (attach) { cur = (cur || '') + AM; flush(); }
+      else { cur = (cur || '') + 'ํ'; flush(); cur = 'า'; }
+      continue;
+    }
+    flush(); cur = ch;
+  }
+  flush();
+  return out;
+}
+const markClass = (k) => k.endsWith('^') ? 'toneHigh' : UPPER.includes(k[0]) || OTHER.includes(k[0]) ? 'upper' : TONES.includes(k[0]) ? 'tone' : LOWER.includes(k[0]) ? 'lower' : 'base';
+
+// ---------------- glyph access with game profile ----------------
+function profileOf(set, idx) { return idx >= 0 ? set.games[idx] : null; }
+function glyph(set, prof, key) {
+  const g = set.glyphs[key];
+  if (!g) return null;
+  if (prof && prof.overrides && prof.overrides[key]) return Object.assign({}, g, {rows: prof.overrides[key]});
+  return g;
+}
+function offsetOf(prof, cls) { return prof && prof.offsets && prof.offsets[cls] ? prof.offsets[cls] : [0, 0]; }
+function effectsOf(prof) {
+  const out = [];
+  if (!prof) return out;
+  for (const e of prof.effects || []) { const k = e.split(' ')[0]; if (/^(shadow-r|shadow-rb|outline-4|outline-8|bold-r)$/.test(k)) out.push(k); }
+  return [...new Set(out)].slice(0, 2);
+}
+
+// draw list for one line: [{key, x, y, g}], missing chars, width
+function layout(set, prof, line) {
+  const W = set.cellW, ops = [], miss = new Set();
+  const anchor = prof ? prof.anchor : set.anchor;
+  const tallDx = prof ? prof.tallDx : set.tallDx;
+  let pen = 2, last = null, hasUp = false;
+  const space = Math.max(3, Math.round(set.cellH / 4));
+  if (set.kind === 'clusters') {
+    for (const tk of clusters(line, set.amAttach)) {
+      if (tk.t === 'sp') { pen += space; continue; }
+      if (tk.t === 'other') { if (tk.c.trim()) { ops.push({box: true, x: pen, w: Math.round(W / 3)}); pen += Math.round(W / 3) + 1; miss.add(tk.c); } continue; }
+      const g = glyph(set, prof, tk.k);
+      if (!g) { ops.push({box: true, x: pen, w: 6}); pen += 7; miss.add(tk.k); continue; }
+      ops.push({g, x: pen - (g.left || 0), y: 0}); pen += g.adv;
+    }
+    return {ops, miss, width: pen + 2};
+  }
+  const chars = [...line];
+  for (let i = 0; i < chars.length; i++) {
+    let ch = chars[i];
+    const nxt = chars[i + 1];
+    if (ch === ' ') { pen += space; last = null; continue; }
+    if (ch === AM) {
+      // nikhahit on the previous base, then sara aa
+      drawMark('ํ'); hasUp = true;
+      drawBase('า'); continue;
+    }
+    if (isMark(ch)) {
+      if (TONES.includes(ch) && (hasUp || nxt === AM) && set.glyphs[ch + '^']) drawMark(ch + '^'); else drawMark(ch);
+      if (UPPER.includes(ch)) hasUp = true;
+      continue;
+    }
+    drawBase(ch);
+  }
+  function drawBase(ch) {
+    const g = glyph(set, prof, ch);
+    hasUp = false;
+    if (!g) {
+      if (ch.trim()) { miss.add(ch); ops.push({box: true, x: pen, w: Math.round(W / 2)}); pen += Math.round(W / 2) + 1; }
+      last = null; return;
+    }
+    const cellX = pen - (g.left || 0);
+    const [, dy] = offsetOf(prof, 'base');
+    ops.push({g, x: cellX, y: dy});
+    pen += g.adv;
+    last = {ch, cellX, end: pen};
+  }
+  function drawMark(key) {
+    const g = glyph(set, prof, key);
+    if (!g) { miss.add(key.replace('^', '')); return; }
+    const cls = markClass(key);
+    const [ox, oy] = offsetOf(prof, cls);
+    let x;
+    const base = last || {ch: '', cellX: pen, end: pen + W};
+    x = anchor === 'cell' ? base.cellX : base.end - W;
+    if (set.tall.includes(base.ch) && cls !== 'lower') x += tallDx;
+    ops.push({g, x: x + ox, y: oy});
+  }
+  return {ops, miss, width: pen + 4};
+}
+
+// render lines -> level grid (Uint8Array, 0 = empty, 1..n ink, 250 = effect)
+function renderText(set, prof, text, fx) {
+  const lines = text.split('\n');
+  const lays = lines.map(l => layout(set, prof, l));
+  const H = set.cellH, pad = 2;
+  const width = Math.max(16, ...lays.map(l => l.width)) + 4;
+  const lh = (prof && prof.lineHeight) ? Math.max(prof.lineHeight, H) : H;
+  const height = lays.length * lh + pad * 2;
+  const grid = new Uint8Array(width * height);
+  const boxes = [];
+  const miss = new Set();
+  lays.forEach((L, li) => {
+    const top = pad + li * lh;
+    L.miss.forEach(m => miss.add(m));
+    for (const op of L.ops) {
+      if (op.box) { boxes.push({x: op.x, y: top + set.bodyTop, w: op.w, h: set.baseline - set.bodyTop + 1}); continue; }
+      const rows = op.g.rows;
+      for (let y = 0; y < rows.length; y++) {
+        const r = rows[y];
+        for (let x = 0; x < r.length; x++) {
+          const v = parseInt(r[x], 16);
+          if (!v) continue;
+          const X = op.x + x, Y = top + op.y + y;
+          if (X >= 0 && X < width && Y >= 0 && Y < height) grid[Y * width + X] = Math.max(grid[Y * width + X], v);
+        }
+      }
+    }
+  });
+  applyFx(grid, width, height, fx);
+  return {grid, width, height, boxes, miss};
+}
+function applyFx(grid, w, h, fx) {
+  for (const f of fx) {
+    if (f === 'bold-r') {
+      for (let y = 0; y < h; y++) for (let x = w - 1; x > 0; x--) if (!grid[y * w + x] && grid[y * w + x - 1] && grid[y * w + x - 1] !== 250) grid[y * w + x] = grid[y * w + x - 1];
+      continue;
+    }
+    const nb = f === 'shadow-r' ? [[-1, 0]] : f === 'shadow-rb' ? [[-1, 0], [0, -1], [-1, -1]] :
+      f === 'outline-4' ? [[-1, 0], [1, 0], [0, -1], [0, 1]] : f === 'outline-8' ? [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]] : [];
+    const src = grid.slice();
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      if (src[y * w + x]) continue;
+      for (const [dx, dy] of nb) {
+        const X = x + dx, Y = y + dy;
+        if (X >= 0 && Y >= 0 && X < w && Y < h && src[Y * w + X] && src[Y * w + X] !== 250) { grid[y * w + x] = 250; break; }
+      }
+    }
+  }
+}
+function hex2rgb(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+function inkColors(set, bg) {
+  const light = bg === '#f4f0e0';
+  return set.palette.map((c, i) => {
+    if (set.levels === 1) return light ? [20, 16, 40] : [255, 255, 255];
+    const t = (i + 1) / set.levels;
+    return light ? [Math.round(240 - 220 * t), Math.round(236 - 220 * t), Math.round(220 - 190 * t)] : hex2rgb(c);
+  });
+}
+function paint(canvas, R, set, scale, bg) {
+  canvas.width = R.width * scale; canvas.height = R.height * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const ink = inkColors(set, bg);
+  const fxc = bg === '#f4f0e0' ? [190, 170, 120] : [8, 6, 20];
+  for (let y = 0; y < R.height; y++) for (let x = 0; x < R.width; x++) {
+    const v = R.grid[y * R.width + x];
+    if (!v) continue;
+    const c = v === 250 ? fxc : ink[Math.min(v, ink.length) - 1];
+    ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+    ctx.fillRect(x * scale, y * scale, scale, scale);
+  }
+  ctx.strokeStyle = '#ff9a3c'; ctx.lineWidth = 1;
+  for (const b of R.boxes) ctx.strokeRect(b.x * scale + .5, b.y * scale + .5, b.w * scale - 1, b.h * scale - 1);
+}
+
+// ---------------- tab 1: browse ----------------
+function setLabel(s) { return `${s.id} (${s.kind === 'clusters' ? 'คลัสเตอร์' : 'ประกอบ'}, ${s.cellW}x${s.cellH}, ${Object.keys(s.glyphs).length} ตัว)`; }
+function gameNames(s) { return [...new Set(s.games.map(g => g.game))]; }
+function drawGlyphCanvas(set, g, scale) {
+  const c = document.createElement('canvas');
+  const rows = g.rows, H = rows.length, W = rows[0].length;
+  c.width = W * scale; c.height = H * scale;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#24407e'; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.fillStyle = 'rgba(255,46,136,.35)'; ctx.fillRect(0, (set.baseline + 1) * scale - 1, c.width, 1);
+  const ink = inkColors(set, '#24407e');
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const v = parseInt(rows[y][x], 16);
+    if (!v) continue;
+    const k = ink[Math.min(v, ink.length) - 1];
+    ctx.fillStyle = `rgb(${k[0]},${k[1]},${k[2]})`; ctx.fillRect(x * scale, y * scale, scale, scale);
+  }
+  return c;
+}
+function buildCards() {
+  const box = $('cards');
+  SETS.forEach((s, i) => {
+    const d = document.createElement('div');
+    d.className = 'card';
+    const gaps = s.coverage.gaps.join(' ');
+    d.innerHTML = `<h3>${esc(s.id)}</h3><div class="t">${esc(s.title)}</div>
+      <div class="m">${s.kind === 'clusters' ? 'คลัสเตอร์สำเร็จรูป' : 'แบบประกอบ'} · ช่อง ${s.cellW}x${s.cellH} · ${Object.keys(s.glyphs).length} ตัว · ${s.levels > 1 ? s.levels + ' ระดับสี' : '1bpp'}</div>
+      <div class="m">ใช้ใน ${gameNames(s).length} เกม${gaps ? ' · ขาด: ' + esc(gaps) : ' · ครบ'}</div>`;
+    const R = renderText(s, null, 'ภาษาไทย น้ำ ปู่', []);
+    const cv = document.createElement('canvas'); paint(cv, R, s, 2, '#24407e'); d.appendChild(cv);
+    d.onclick = () => { document.querySelectorAll('.card').forEach(x => x.classList.remove('on')); d.classList.add('on'); showDetail(i); };
+    box.appendChild(d);
+  });
+}
+function showDetail(i) {
+  const s = SETS[i];
+  const el = $('detail');
+  const cov = s.coverage;
+  const scale = Math.max(s.cellW, s.cellH) <= 16 ? 3 : 2;
+  let html = `<h2 style="color:var(--acc);margin:18px 0 4px">${esc(s.id)}</h2><p class="note">${esc(s.title)}</p>
+  <div class="row"><div><span class="tag">ช่อง ${s.cellW}x${s.cellH}</span><span class="tag">ตัวบนสุดของพยัญชนะ แถว ${s.bodyTop}</span><span class="tag">เส้นฐาน แถว ${s.baseline}</span>
+  <span class="tag">วางสระ: ${s.anchor === 'cell' ? 'ช่องเดียวกับพยัญชนะ' : 'ชิดขวาของพยัญชนะ'}</span><span class="tag">ป ฝ ฟ ฬ เลื่อน ${s.tallDx}px</span>
+  <span class="tag">ำ: ${esc(cov.saraAm)}</span><span class="tag">พยัญชนะ ${cov.consonants}/${cov.consonantsTotal}</span><span class="tag">สระ ${cov.vowels}/${cov.vowelsTotal}</span>
+  <span class="tag">วรรณยุกต์ ${cov.tones}/5 (+แบบสูง ${cov.highToneVariants})</span><span class="tag">เลขไทย ${cov.digits}/10</span></div></div>
+  ${cov.gaps.length ? `<p class="warn">ขาด: ${esc(cov.gaps.join(' '))}</p>` : '<p class="note" style="color:var(--ok)">พยัญชนะ สระ วรรณยุกต์ ครบ</p>'}
+  <h3>เกมที่ใช้ และค่าที่ใช้จริง</h3>
+  <div class="tablewrap"><table><thead><tr><th>เกม</th><th>ฟอนต์</th><th>บรรทัดสูง</th><th>ระยะที่ต่างจากชุดหลัก</th><th>เอฟเฟกต์</th><th>หมายเหตุ</th></tr></thead><tbody>`;
+  for (const g of s.games) {
+    const off = Object.entries(g.offsets || {}).map(([k, v]) => `${k} ${v[1] > 0 ? 'ลง' : 'ขึ้น'} ${Math.abs(v[1])}${v[0] ? ', x ' + v[0] : ''}`).join('; ');
+    const ov = Object.keys(g.overrides || {});
+    html += `<tr><td>${esc(g.game)}</td><td>${esc(g.font)}</td><td>${g.lineHeight || ''}</td><td>${esc(off || '-')}${ov.length ? '<br>วาดใหม่: ' + esc(ov.join(' ')) : ''}</td><td>${esc((g.effects || []).join(', ') || '-')}</td><td style="font-size:12px">${esc(g.notes)}</td></tr>`;
+  }
+  html += `</tbody></table></div><h3>ตัวอักษร (${Object.keys(s.glyphs).length})</h3><div class="glyphs" id="gl"></div>`;
+  const inv = s.inventory || {};
+  html += `<h3>คลัสเตอร์ที่เกมใช้จริง</h3><p class="note">กลุ่มพยัญชนะ+สระ/วรรณยุกต์ที่พบในคำแปลของแต่ละเกม เรียงจากใช้บ่อยไปน้อย (ใช้เลือกว่าจะเตรียมช่องสำเร็จรูปตัวไหนบ้าง)</p>`;
+  for (const [slug, list] of Object.entries(inv)) {
+    const g = s.games.find(x => x.slug === slug);
+    html += `<details><summary>${esc(g ? g.game : slug)}: ${list.length} คลัสเตอร์</summary><pre>${esc(list.join(' '))}</pre></details>`;
+  }
+  el.innerHTML = html;
+  const gl = $('gl');
+  for (const [k, g] of Object.entries(s.glyphs)) {
+    const d = document.createElement('div'); d.className = 'g';
+    const lab = (g.type !== 'base' ? '◌' : '') + k.replace('^', '');
+    d.innerHTML = `${esc(lab)}${k.endsWith('^') ? ' <span style="color:var(--hot)">hi</span>' : ''}${g.type === 'base' ? ` <span style="font-size:10px">${g.adv}</span>` : ''}`;
+    d.appendChild(drawGlyphCanvas(s, g, scale));
+    gl.appendChild(d);
+  }
+  el.scrollIntoView({behavior: 'smooth'});
+}
+
+// ---------------- tab 2: preview ----------------
+const profSel = {};
+function renderPreviews() {
+  const box = $('previews');
+  const text = $('ptext').value;
+  const scale = +$('pscale').value, bg = $('pbg').value, which = $('pwhich').value;
+  box.innerHTML = '';
+  SETS.forEach((s, i) => {
+    if (which === 'comp' && s.kind !== 'components') return;
+    if (which === 'clus' && s.kind !== 'clusters') return;
+    const d = document.createElement('div'); d.className = 'prev';
+    const h = document.createElement('h4');
+    h.innerHTML = `<span>${esc(s.id)}</span>`;
+    const sel = document.createElement('select');
+    sel.innerHTML = `<option value="-1">ชุดหลัก</option>` + s.games.map((g, j) => `<option value="${j}">${esc(g.game)}: ${esc(g.font)}</option>`).join('');
+    sel.value = profSel[s.id] !== undefined ? profSel[s.id] : -1;
+    sel.onchange = () => { profSel[s.id] = sel.value; renderPreviews(); };
+    h.appendChild(sel);
+    d.appendChild(h);
+    const prof = profileOf(s, +sel.value);
+    const R = renderText(s, prof, text, effectsOf(prof));
+    const wrap = document.createElement('div'); wrap.className = 'cv';
+    const cv = document.createElement('canvas'); paint(cv, R, s, scale, bg);
+    cv.dataset.set = s.id;
+    wrap.appendChild(cv); d.appendChild(wrap);
+    if (R.miss.size) { const m = document.createElement('div'); m.className = 'miss'; m.textContent = 'ไม่มีในชุดนี้: ' + [...R.miss].join(' '); d.appendChild(m); }
+    box.appendChild(d);
+  });
+}
+['ptext', 'pscale', 'pbg', 'pwhich'].forEach(id => $(id).addEventListener('input', renderPreviews));
+
+// ---------------- tab 3: export ----------------
+function fillExport() {
+  $('eset').innerHTML = SETS.map((s, i) => `<option value="${i}">${esc(setLabel(s))}</option>`).join('');
+  $('eset').onchange = fillProf; fillProf();
+}
+function fillProf() {
+  const s = SETS[+$('eset').value];
+  $('eprof').innerHTML = `<option value="-1">ชุดหลัก</option>` + s.games.map((g, j) => `<option value="${j}">${esc(g.game)}: ${esc(g.font)}</option>`).join('');
+  $('ebpp').value = s.bpp === 1 ? '1' : s.bpp === 2 ? '2' : '4';
+  updPal();
+}
+function updPal() {
+  const b = +$('ebpp').value;
+  $('epal').value = b === 1 ? '0=พื้น 1=หมึก (ไม่มีเงา/ขอบ)' : b === 2 ? '0=พื้น 1=หมึก 2=เงา/ขอบ 3=หมึกจาง' : '0=พื้น 1..13=หมึกเข้มไปจาง 15=เงา/ขอบ';
+  $('efmt').value = b === 4 ? 'gba4' : b === 2 ? 'gb2' : '1bpp';
+}
+$('ebpp').onchange = updPal;
+const ceil8 = (n) => Math.ceil(n / 8) * 8;
+// compose one item (glyph key or cluster) into a cell -> {cell grid, w, h, adv, left}
+function composeItem(set, prof, item, fx) {
+  let R, adv = 0, left = 0;
+  if (item.glyphKey) {
+    const g = glyph(set, prof, item.glyphKey);
+    const cls = markClass(item.glyphKey);
+    const [ox, oy] = set.kind === 'components' ? offsetOf(prof, cls) : [0, 0];
+    const W = set.cellW, H = set.cellH;
+    R = {grid: new Uint8Array(W * H), width: W, height: H};
+    g.rows.forEach((r, y) => [...r].forEach((c, x) => { const v = parseInt(c, 16); const X = x + (cls === 'base' ? 0 : ox), Y = y + oy; if (v && X >= 0 && X < W && Y >= 0 && Y < H) R.grid[Y * W + X] = v; }));
+    applyFx(R.grid, W, H, fx);
+    adv = g.type === 'base' ? g.adv : 0; left = g.left || 0;
+  } else {
+    // a cluster: lay it out on its own, crop to ink box starting at x = 0
+    const L = layout(set, prof, item.text);
+    const W = set.cellW * 3, H = set.cellH;
+    const g = new Uint8Array(W * H);
+    for (const op of L.ops) {
+      if (op.box) continue;
+      op.g.rows.forEach((r, y) => [...r].forEach((c, x) => { const v = parseInt(c, 16); const X = op.x + x + set.cellW, Y = op.y + y; if (v && X >= 0 && X < W && Y >= 0 && Y < H) g[Y * W + X] = Math.max(g[Y * W + X], v); }));
+    }
+    applyFx(g, W, H, fx);
+    let minx = W, maxx = -1;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (g[y * W + x]) { minx = Math.min(minx, x); maxx = Math.max(maxx, x); }
+    if (maxx < 0) { minx = 0; maxx = 0; }
+    const w = maxx - minx + 1;
+    R = {grid: new Uint8Array(w * H), width: w, height: H};
+    for (let y = 0; y < H; y++) for (let x = 0; x < w; x++) R.grid[y * w + x] = g[y * W + x + minx];
+    adv = Math.max(1, (L.width - 6) - (minx - set.cellW - 2));
+  }
+  return {R, adv, left};
+}
+function levelToIndex(v, levels, bpp) {
+  if (!v) return 0;
+  if (v === 250) return bpp === 1 ? 0 : bpp === 2 ? 2 : 15;
+  if (bpp === 1) return 1;
+  if (bpp === 2) return (levels === 1 || v / levels > 0.5) ? 1 : 3;
+  if (levels === 1) return 1;
+  return Math.max(1, Math.min(13, 1 + Math.round((1 - v / levels) * 12)));
+}
+async function exportSet() {
+  const si = +$('eset').value, s = SETS[si], prof = profileOf(s, +$('eprof').value);
+  const bpp = +$('ebpp').value, what = $('ewhat').value, fmt = $('efmt').value;
+  const fxSel = $('efx').value;
+  const fx = fxSel === 'profile' ? effectsOf(prof) : fxSel === 'none' ? [] : [fxSel];
+  let start = parseInt($('estart').value, 16); if (isNaN(start)) start = 0x80;
+  let items = [];
+  if (what === 'glyphs') items = Object.keys(s.glyphs).map(k => ({glyphKey: k, label: k}));
+  else {
+    let list;
+    if (what === 'text') list = [...new Set(clusters($('etext').value.replace(/\n/g, ' '), s.amAttach).filter(t => t.t === 'thai').map(t => t.k))];
+    else {
+      const slug = prof ? prof.slug : (s.games[0] || {}).slug;
+      list = (s.inventory || {})[slug] || [];
+      list = [...new Set([...list, ...Object.keys(s.glyphs).filter(k => s.glyphs[k].type === 'base' && k.length === 1)])];
+    }
+    for (const k of list) {
+      if (s.kind === 'clusters') { if (s.glyphs[k]) items.push({glyphKey: k, label: k}); }
+      else items.push({text: k, label: k});
+    }
+  }
+  if (!items.length) { $('est').textContent = 'ไม่มีตัวอักษรให้ส่งออก'; return; }
+  const comps = items.map(it => Object.assign(composeItem(s, prof, it, fx), {label: it.label}));
+  const cw = ceil8(Math.max(...comps.map(c => c.R.width))), ch = ceil8(s.cellH);
+  const per = 16, rows = Math.ceil(comps.length / per);
+  const SW = per * cw, SH = rows * ch;
+  const pix = new Uint8Array(SW * SH);
+  const tiles = [];
+  comps.forEach((c, i) => {
+    const ox = (i % per) * cw, oy = Math.floor(i / per) * ch;
+    const cell = new Uint8Array(cw * ch);
+    for (let y = 0; y < c.R.height; y++) for (let x = 0; x < c.R.width; x++) {
+      const v = levelToIndex(c.R.grid[y * c.R.width + x], s.levels, bpp);
+      cell[y * cw + x] = v; pix[(oy + y) * SW + ox + x] = v;
+    }
+    for (let ty = 0; ty < ch / 8; ty++) for (let tx = 0; tx < cw / 8; tx++) tiles.push(tileBytes(cell, cw, tx * 8, ty * 8, fmt));
+  });
+  // palette
+  const palN = 1 << bpp;
+  const pal = [[36, 64, 126]];
+  for (let i = 1; i < palN; i++) {
+    if (bpp === 1) pal.push([255, 255, 255]);
+    else if (bpp === 2) pal.push(i === 1 ? [255, 255, 255] : i === 2 ? [8, 6, 20] : [170, 180, 210]);
+    else pal.push(i === 15 ? [8, 6, 20] : i === 14 ? [0, 0, 0] : (() => { const t = 255 - (i - 1) * 12; return [t, t, t]; })());
+  }
+  const png = await indexedPng(SW, SH, pix, bpp, pal);
+  const bin = concat(tiles);
+  // tbl + metrics
+  const codes = [], tbl = [], met = [];
+  comps.forEach((c, i) => {
+    const code = start + i;
+    const hex = code > 0xff ? code.toString(16).toUpperCase().padStart(4, '0') : code.toString(16).toUpperCase().padStart(2, '0');
+    const text = c.label.replace('^', '');
+    tbl.push(`${hex}=${text}`);
+    codes.push([c.label, code]);
+    met.push({code: hex, key: c.label, adv: c.adv, left: c.left, type: items[i].glyphKey ? s.glyphs[items[i].glyphKey].type : 'cluster', tiles: (cw / 8) * (ch / 8)});
+  });
+  const base = `${s.id}${prof ? '_' + prof.slug : ''}_${what}_${bpp}bpp`;
+  const metaJson = {set: s.id, profile: prof ? prof.slug : null, cellW: cw, cellH: ch, tilesPerGlyph: (cw / 8) * (ch / 8), tileFormat: fmt, bpp,
+    startCode: start.toString(16), anchor: prof ? prof.anchor : s.anchor, tallDx: prof ? prof.tallDx : s.tallDx, glyphs: met};
+  // encode the sample text with this table
+  const enc = encodeSample(s, prof, $('etext').value, new Map(codes), what);
+  const out = $('eout');
+  out.innerHTML = '';
+  const links = [[png, base + '.png', 'ภาพไทล์ (.png, indexed ' + bpp + 'bpp)'], [new Blob([bin]), base + '.bin', 'ไทล์ดิบ (.bin, ' + fmt + ')'],
+    [new Blob(['﻿' + tbl.join('\n') + '\n'], {type: 'text/plain'}), base + '.tbl', 'ตารางรหัส (.tbl)'],
+    [new Blob([JSON.stringify(metaJson, null, 1)], {type: 'application/json'}), base + '.json', 'ความกว้าง/ข้อมูลตัวอักษร (.json)']];
+  for (const [blob, name, lab] of links) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.className = 'btn alt'; a.textContent = lab; a.style.display = 'inline-block'; a.style.textDecoration = 'none';
+    out.appendChild(a);
+  }
+  const img = document.createElement('img'); img.src = URL.createObjectURL(png); img.style.cssText = 'display:block;margin-top:12px;image-rendering:pixelated;width:' + (SW * 2) + 'px;max-width:100%';
+  out.appendChild(img);
+  const pre = document.createElement('pre'); pre.textContent = 'ลองเข้ารหัส: ' + $('etext').value + '\n' + enc; out.appendChild(pre);
+  $('est').textContent = `ได้ ${comps.length} ตัว, ช่องละ ${cw}x${ch} พิกเซล (${(cw / 8) * (ch / 8)} ไทล์), ไทล์รวม ${tiles.length} ไทล์ = ${bin.length} ไบต์` +
+    (s.kind === 'components' && what === 'glyphs' ? '\nสระ/วรรณยุกต์ (adv=0) ต้องวาดทับตัวก่อนหน้า: ' + (metaJson.anchor === 'cell' ? 'วางที่ช่องเดียวกับพยัญชนะ' : 'ชิดขวาของพยัญชนะ (ปลายช่องตรงกับตำแหน่งปากกาหลังพยัญชนะ)') : '');
+}
+function encodeSample(s, prof, text, map, what) {
+  const out = [], miss = new Set();
+  const put = (k) => { if (map.has(k)) { const c = map.get(k); out.push(c > 0xff ? c.toString(16).toUpperCase().padStart(4, '0') : c.toString(16).toUpperCase().padStart(2, '0')); } else miss.add(k); };
+  if (s.kind === 'clusters' || what !== 'glyphs') {
+    for (const t of clusters(text, s.amAttach)) { if (t.t === 'thai') put(t.k); else out.push(t.t === 'sp' ? '[sp]' : '[' + t.c + ']'); }
+  } else {
+    const ch = [...text]; let up = false;
+    ch.forEach((c, i) => {
+      if (c === ' ') { out.push('[sp]'); return; }
+      if (c === AM) { put('ํ'); put('า'); up = false; return; }
+      if (TONES.includes(c)) { put((up || ch[i + 1] === AM) && s.glyphs[c + '^'] ? c + '^' : c); return; }
+      if (UPPER.includes(c)) up = true; else if (!isMark(c)) up = false;
+      put(c);
+    });
+  }
+  return out.join(' ') + (miss.size ? '\nไม่มีรหัส: ' + [...miss].join(' ') : '');
+}
+function tileBytes(cell, cw, x0, y0, fmt) {
+  const px = (x, y) => cell[(y0 + y) * cw + x0 + x];
+  if (fmt === '1bpp') { const b = new Uint8Array(8); for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) if (px(x, y)) b[y] |= 0x80 >> x; return b; }
+  if (fmt === 'gb2') { const b = new Uint8Array(16); for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { const v = px(x, y) & 3; if (v & 1) b[y * 2] |= 0x80 >> x; if (v & 2) b[y * 2 + 1] |= 0x80 >> x; } return b; }
+  if (fmt === 'lin2') { const b = new Uint8Array(16); for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) b[y * 2 + (x >> 2)] |= (px(x, y) & 3) << ((x & 3) * 2); return b; }
+  const b = new Uint8Array(32); for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) b[y * 4 + (x >> 1)] |= (px(x, y) & 15) << ((x & 1) * 4); return b;
+}
+function concat(arrs) { const n = arrs.reduce((a, b) => a + b.length, 0); const o = new Uint8Array(n); let p = 0; for (const a of arrs) { o.set(a, p); p += a.length; } return o; }
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(buf) { let c = 0xffffffff; for (let i = 0; i < buf.length; i++) c = CRC[(c ^ buf[i]) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; }
+function chunk(type, data) {
+  const o = new Uint8Array(12 + data.length), dv = new DataView(o.buffer);
+  dv.setUint32(0, data.length); for (let i = 0; i < 4; i++) o[4 + i] = type.charCodeAt(i);
+  o.set(data, 8); dv.setUint32(8 + data.length, crc32(o.subarray(4, 8 + data.length))); return o;
+}
+async function zlib(data) {
+  if (typeof CompressionStream !== 'undefined') {
+    const cs = new CompressionStream('deflate');
+    const s = new Blob([data]).stream().pipeThrough(cs);
+    return new Uint8Array(await new Response(s).arrayBuffer());
+  }
+  // fallback: stored (uncompressed) deflate blocks
+  const blocks = []; let a = 1, b = 0;
+  for (let i = 0; i < data.length; i++) { a = (a + data[i]) % 65521; b = (b + a) % 65521; }
+  blocks.push(new Uint8Array([0x78, 0x01]));
+  for (let p = 0; p < data.length || p === 0; p += 65535) {
+    const part = data.subarray(p, p + 65535), last = p + 65535 >= data.length;
+    const h = new Uint8Array([last ? 1 : 0, part.length & 255, part.length >> 8, ~part.length & 255, (~part.length >> 8) & 255]);
+    blocks.push(h, part); if (last) break;
+  }
+  const ad = (b << 16 | a) >>> 0; blocks.push(new Uint8Array([ad >>> 24, (ad >>> 16) & 255, (ad >>> 8) & 255, ad & 255]));
+  return concat(blocks);
+}
+async function indexedPng(w, h, pix, bpp, pal) {
+  const stride = Math.ceil(w * bpp / 8);
+  const raw = new Uint8Array((stride + 1) * h);
+  for (let y = 0; y < h; y++) {
+    const o = y * (stride + 1) + 1;
+    for (let x = 0; x < w; x++) {
+      const v = pix[y * w + x], bit = x * bpp;
+      raw[o + (bit >> 3)] |= v << (8 - bpp - (bit & 7));
+    }
+  }
+  const ihdr = new Uint8Array(13), dv = new DataView(ihdr.buffer);
+  dv.setUint32(0, w); dv.setUint32(4, h); ihdr[8] = bpp; ihdr[9] = 3;
+  const plte = new Uint8Array(pal.length * 3); pal.forEach((c, i) => plte.set(c, i * 3));
+  const trns = new Uint8Array([0]);
+  const sig = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+  return new Blob([sig, chunk('IHDR', ihdr), chunk('PLTE', plte), chunk('tRNS', trns), chunk('IDAT', await zlib(raw)), chunk('IEND', new Uint8Array(0))], {type: 'image/png'});
+}
+$('ego').onclick = () => exportSet().catch(e => { $('est').textContent = 'ผิดพลาด: ' + e.message; });
+
+buildCards();
+fillExport();
+</script>
+</body>
+</html>

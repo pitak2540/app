@@ -63,9 +63,19 @@
     }
     return s;
   }
+  /* จัดลำดับสระ/วรรณยุกต์ในแต่ละพยางค์ให้เป็นแบบเดียวกัน (ล่าง บน วรรณยุกต์) และรวม ํา เป็น ำ ให้ตรงกับตารางอักษร */
+  const UPV = 'ัิีึื็ํ', TONE = '่้๊๋์๎', LOWV = 'ฺุู';
+  const isMark = c => UPV.includes(c) || TONE.includes(c) || LOWV.includes(c), markRank = c => LOWV.includes(c) ? 1 : UPV.includes(c) ? 2 : 3;
+  function normThai(s) {
+    s = s.normalize('NFC').replace(/ํา/g, 'ำ'); let out = '', i = 0;
+    while (i < s.length) { let j = i + 1; while (j < s.length && isMark(s[j])) j++; const base = s[i];
+      if (isMark(base)) { out += s.slice(i, j); i = j; continue; }
+      out += base + [...s.slice(i + 1, j)].sort((a, b) => markRank(a) - markRank(b)).join(''); i = j; }
+    return out;
+  }
   function encode(str, table) {
     const out = [], bad = [];
-    str = str.replace(/\r\n?/g, '\n');
+    str = normThai(str.replace(/\r\n?/g, '\n'));
     for (let i = 0; i < str.length;) {
       if (str[i] === '<') { const m = /^<([0-9A-Fa-f]{2})>/.exec(str.substr(i, 4)); if (m) { out.push(parseInt(m[1], 16)); i += 4; continue; } }
       let hit = false;
@@ -84,12 +94,14 @@
   /* ---------- แกะข้อความ ---------- */
   function scan(rom, opt) {
     const table = opt.table, term = opt.term == null ? 0 : opt.term, minLen = opt.minLen || 4;
+    const isTerm = new Uint8Array(256); for (const t of (opt.terms && opt.terms.length ? opt.terms : [term])) isTerm[t & 255] = 1;
+    const ctl = opt.ctl | 0; // ยอมให้มีไบต์ที่ไม่อยู่ในตาราง (รหัสคำสั่งของเกม) ติดกันได้ไม่เกินกี่ตัวในข้อความ
     const minRatio = opt.minRatio == null ? 0.7 : opt.minRatio, limit = opt.limit || 60000;
     const ok = new Uint8Array(256), letter = new Uint8Array(256);
     const multi = !!opt.multi;
     for (let b = 0; b < 256; b++) {
       const s = table.dec1[b];
-      if (s === undefined || b === term) continue;
+      if (s === undefined || isTerm[b]) continue;
       if (opt.asciiOnly && b >= 0x80) continue;
       ok[b] = 1;
       if (/^[\p{L}\p{M} ]+$/u.test(s)) letter[b] = 1;
@@ -106,20 +118,35 @@
           const ch = table.dec2.get(b << 8 | rom[j + 1]), c = ch === undefined ? 0 : ch.charCodeAt(0);
           if ((c >= 0x3000 && c <= 0x30FF) || (c >= 0x4E00 && c <= 0x9FFF) || (c >= 0xFF01 && c <= 0xFF5E) || (c >= 0xAC00 && c <= 0xD7A3)) { wide++; if (c >= 0x3041 && c <= 0x30FC) kana++; if (c > 0x3040) L += 2; j += 2; continue; }
         }
-        if (!ok[b]) break;
+        if (!ok[b]) {
+          if (!ctl || isTerm[b]) break;
+          let k = j; while (k < end && k - j <= ctl && !ok[rom[k]] && !isTerm[rom[k]] && !(multi && table.lead[rom[k]])) k++;
+          if (k - j > ctl || k >= end || !(ok[rom[k]] || isTerm[rom[k]])) break;
+          j = k; continue;
+        }
         L += letter[b]; j++;
       }
-      if (j < end && rom[j] === term && j - i >= minLen && L / (j - i) >= minRatio && (!opt.needKana || kana > 0) && (!opt.minWide || wide >= opt.minWide)) {
+      while (ctl && j > i && !ok[rom[j - 1]] && !(multi && table.lead[rom[j - 1]])) j--; // ไม่เอารหัสคำสั่งท้ายข้อความ
+      if (j < end && isTerm[rom[j]] && j - i >= minLen && L / (j - i) >= minRatio && (!opt.needKana || kana > 0) && (!opt.minWide || wide >= opt.minWide)) {
         let extra = 0;
-        while (((j + 1 + extra) & 3) !== 0 && rom[j + 1 + extra] === term) extra++;
+        const tb = rom[j];
+        while (((j + 1 + extra) & 3) !== 0 && rom[j + 1 + extra] === tb) extra++;
         if (found.length >= limit) { truncated = true; break; }
         byOff.set(i, found.length);
-        found.push({ off: i, len: j - i, slot: j - i + extra, ptrs: [], text: '', thai: '' });
+        found.push({ off: i, len: j - i, slot: j - i + extra, ptrs: [], text: '', thai: '', term: tb });
       }
       i = j + 1;
     }
     const P = opt.ptr === undefined ? { delta: GBA_BASE } : opt.ptr;
-    if (P) for (let p = 0, st = P.align || 4; p + 3 < rom.length; p += st) {
+    if (P && P.vals) { // พอยน์เตอร์แบบอื่น (GB / NES / SNES / กำหนดเอง)
+      const want = new Map();
+      found.forEach((e, idx) => P.vals(e.off).forEach((v, form) => { const k = v >>> 0; if (!want.has(k)) want.set(k, []); want.get(k).push([idx, form]); }));
+      for (let p = 0, st = P.align || 1; p + P.n <= rom.length; p += st) {
+        let v = 0; for (let k = 0; k < P.n; k++) v += rom[p + (P.big ? P.n - 1 - k : k)] * 2 ** (8 * k);
+        const hit = want.get(v >>> 0); if (!hit) continue;
+        for (const [idx, form] of hit) { const e = found[idx]; if (P.accept && !P.accept(rom, p, e.off, form)) continue; e.ptrs.push(p); (e.pform || (e.pform = [])).push(form); }
+      }
+    } else if (P) for (let p = 0, st = P.align || 4; p + 3 < rom.length; p += st) {
       const v = P.big ? ((rom[p] << 24 | rom[p + 1] << 16 | rom[p + 2] << 8 | rom[p + 3]) >>> 0) : u32(rom, p);
       const idx = byOff.get(v - P.delta);
       if (idx !== undefined) found[idx].ptrs.push(p);
@@ -150,6 +177,57 @@
     if (e.ptrs.length) return { status: 'move', bytes: r.bytes };
     return { status: 'toolong', bytes: r.bytes };
   }
+  /* ช่วงไบต์ว่าง (00 / FF) ที่ยาวติดกันอย่างน้อย min ไบต์ */
+  function freeRuns(rom, which, min, from) {
+    const want = which === 'both' ? [0, 255] : [which === '00' ? 0 : 255], runs = [];
+    for (let i = from || 0; i < rom.length;) {
+      const b = rom[i]; if (!want.includes(b)) { i++; continue; }
+      let j = i; while (j < rom.length && rom[j] === b) j++;
+      if (j - i >= min) runs.push({ a: i, b: j, cur: i + (i > 0 ? 4 : 0) });
+      i = j;
+    }
+    return runs;
+  }
+  function allocRun(runs, size, region, bank, hdr) {
+    const [lo, hi] = region;
+    for (const r of runs) {
+      let s = Math.max(r.cur, lo);
+      if (bank) { const h = hdr || 0, e = Math.floor((s - h) / bank) * bank + h + bank; if (s + size > e) continue; }
+      if (s + size <= r.b && s + size <= hi) { r.cur = s + size + 1; return s; }
+    }
+    return -1;
+  }
+  /* รูปแบบพอยน์เตอร์ของเครื่องต่าง ๆ
+     vals(off) = ค่าที่พอยน์เตอร์จะมีถ้าชี้มาที่ off (หลายแบบได้ เรียกว่า form), write(rom,p,off,form) = เขียนพอยน์เตอร์ใหม่
+     region(off) = ช่วงที่ย้ายข้อความไปได้แล้วพอยน์เตอร์ยังชี้ถึง */
+  function ptrModel(kind, rom, o) {
+    o = o || {}; const L = rom.length, wr = (n, big) => (r, p, v) => { for (let k = 0; k < n; k++) r[p + (big ? n - 1 - k : k)] = Math.floor(v / 2 ** (8 * k)) & 255; };
+    if (kind === 'gba') { const w = wr(4); return { n: 4, align: 4, vals: x => [GBA_BASE + x], write: (r, p, x) => w(r, p, GBA_BASE + x), region: () => [0, L] }; }
+    if (kind === 'gb' || kind === 'gbfar') {
+      const far = kind === 'gbfar', w = wr(2), v = x => x < 0x4000 ? x : 0x4000 + (x & 0x3FFF);
+      return { n: 2, bank: 0x4000, vals: x => [v(x)],
+        accept: (r, p, x) => far ? r[p + 2] === (x >> 14) : (x < 0x4000 || (p >> 14) === (x >> 14) || p < 0x4000 && r[p + 2] === (x >> 14)),
+        write: (r, p, x) => { w(r, p, v(x)); if (far || (p >> 14) !== (x >> 14) && x >= 0x4000) r[p + 2] = x >> 14; },
+        region: x => far ? [0x4000, L] : x < 0x4000 ? [0, 0x4000] : [x & ~0x3FFF, (x & ~0x3FFF) + 0x4000] };
+    }
+    if (kind === 'nes') {
+      const h = rom[0] === 0x4E && rom[1] === 0x45 && rom[2] === 0x53 ? 16 : 0, bs = o.bank || 0x4000, base = o.base == null ? 0x8000 : o.base, w = wr(2);
+      const val = x => base + ((x - h) % bs);
+      return { n: 2, bank: bs, hdr: h, vals: x => [val(x)], accept: (r, p, x) => Math.floor((p - h) / bs) === Math.floor((x - h) / bs) || p < h + 0x4000 && x >= L - 0x4000,
+        write: (r, p, x) => w(r, p, val(x)), region: x => { const b = Math.floor((x - h) / bs) * bs + h; return [b, b + bs]; } };
+    }
+    const h = L % 1024 === 512 ? 512 : 0;
+    if (kind === 'snes-lo') { const w = wr(3), val = (x, f) => { const y = x - h; return ((y >> 15) << 16 | 0x8000 | (y & 0x7FFF)) + (f ? 0x800000 : 0); };
+      return { n: 3, bank: 0x8000, hdr: h, vals: x => [val(x, 0), val(x, 1)], write: (r, p, x, f) => w(r, p, val(x, f)), region: () => [h, L] }; }
+    if (kind === 'snes-hi') { const w = wr(3), val = (x, f) => (f ? 0x400000 : 0xC00000) + x - h;
+      return { n: 3, bank: 0x10000, hdr: h, vals: x => [val(x, 0), val(x, 1)], write: (r, p, x, f) => w(r, p, val(x, f)), region: () => [h, L] }; }
+    if (kind === 'snes-lo2') { const w = wr(2), val = x => 0x8000 | ((x - h) & 0x7FFF);
+      return { n: 2, bank: 0x8000, hdr: h, vals: x => [val(x)], accept: (r, p, x) => ((p - h) >> 15) === ((x - h) >> 15), write: (r, p, x) => w(r, p, val(x)),
+        region: x => { const b = ((x - h) & ~0x7FFF) + h; return [b, b + 0x8000]; } }; }
+    if (kind === 'custom') { const n = o.n || 4, base = o.base || 0, w = wr(n, !!o.big);
+      return { n, big: !!o.big, align: o.align || 1, vals: x => [base + x], write: (r, p, x) => w(r, p, base + x), region: () => [0, L] }; }
+    return null;
+  }
   function findFree(rom) {
     const n = rom.length, last = rom[n - 1];
     if (last !== 0xFF && last !== 0x00) return n;
@@ -171,13 +249,24 @@
       if (c.status === 'empty') continue;
       if (c.status === 'inplace') {
         rom.set(c.bytes, e.off);
-        rom.fill(term, e.off + c.bytes.length, e.off + e.slot + 1);
+        rom.fill(e.term == null ? term : e.term, e.off + c.bytes.length, e.off + e.slot + 1);
         stats.inplace++;
       } else if (c.status === 'move') moves.push([e, c.bytes]);
       else stats[c.status]++;
       report.set(e.off, { status: c.status, bad: c.bad });
     }
-    const jobs = moves.map(([e, b]) => ({ bytes: Uint8Array.from(b.concat([term])), ptrs: e.ptrs, rep: report.get(e.off), text: true }));
+    let jobs = moves.map(([e, b]) => ({ bytes: Uint8Array.from(b.concat([e.term == null ? term : e.term])), ptrs: e.ptrs, pform: e.pform, off: e.off, rep: report.get(e.off), text: true }));
+    if (P.vals) { // พอยน์เตอร์แบบแบงก์: ย้ายไปที่ว่างในแบงก์ที่พอยน์เตอร์ชี้ได้เท่านั้น ไม่ขยายรอม
+      const runs = freeRuns(rom, opt.freeByte == null ? 'both' : opt.freeByte, opt.freeMin || 32, opt.freeOff || 0);
+      for (const j of jobs) {
+        const at = allocRun(runs, j.bytes.length, P.region ? P.region(j.off, rom.length) : [0, rom.length], P.bank, P.hdr);
+        if (at < 0) { j.rep.status = 'noroom'; stats.noroom = (stats.noroom || 0) + 1; continue; }
+        rom.set(j.bytes, at);
+        j.ptrs.forEach((p, k) => { P.write(rom, p, at, j.pform ? j.pform[k] : 0); stats.ptrs++; });
+        j.rep.newOff = at; stats.moved++;
+      }
+      jobs = jobs.filter(j => !j.text);
+    }
     stats.gfx = 0; stats.gfxMoved = 0;
     for (const g of opt.blobs || []) {
       if (g.bytes.length <= g.origLen) { rom.set(g.bytes, g.off); stats.gfx++; }
@@ -197,7 +286,7 @@
       for (const j of jobs) {
         let at = placed.get(j.key);
         if (at === undefined) { at = cur; rom.set(j.bytes, at); cur = (at + j.bytes.length + 3) & ~3; placed.set(j.key, at); }
-        for (const p of j.ptrs) { const v = P.delta + at; if (P.big) { rom[p] = v >>> 24; rom[p + 1] = v >>> 16 & 255; rom[p + 2] = v >>> 8 & 255; rom[p + 3] = v & 255; } else put32(rom, p, v); stats.ptrs++; }
+        for (const p of j.ptrs) { const v = (P.vals ? GBA_BASE : P.delta) + at; if (P.big) { rom[p] = v >>> 24; rom[p + 1] = v >>> 16 & 255; rom[p + 2] = v >>> 8 & 255; rom[p + 3] = v & 255; } else put32(rom, p, v); stats.ptrs++; }
         j.rep.newOff = at; if (j.text) stats.moved++; else { stats.gfx++; stats.gfxMoved++; }
       }
     }
@@ -315,5 +404,5 @@
     return rom;
   }
 
-  root.RS = { put32, GBA_BASE, crc32, hex, u32, header, asciiPairs, thaiPairs, makeTable, parseTbl, tblText, decode, encode, scan, relativeSearch, checkEntry, findFree, build, applyBps, createBps, applyIps, applyPatch, makeZip, toCsv, parseCsv, demoRom };
+  root.RS = { put32, GBA_BASE, crc32, hex, u32, header, asciiPairs, thaiPairs, makeTable, parseTbl, tblText, decode, encode, scan, relativeSearch, normThai, checkEntry, findFree, freeRuns, ptrModel, build, applyBps, createBps, applyIps, applyPatch, makeZip, toCsv, parseCsv, demoRom };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1,7 +1,9 @@
 import json
 img = json.load(open('img.json'))
 s = open('page.src.html', encoding='utf-8').read()
-s = s.replace('/*CORE*/', open('core.js', encoding='utf-8').read() + '\n' + open('core2.js', encoding='utf-8').read() + '\n' + open('dict.js', encoding='utf-8').read() + '\n' + open('dict2.js', encoding='utf-8').read() + '\n' + open('mt.js', encoding='utf-8').read() + '\n' + open('fr8x8.js', encoding='utf-8').read())
+js_str = lambda f: json.dumps(open(f, encoding='utf-8').read(), ensure_ascii=False).replace('</', '<\\/')
+s = s.replace('/*PAGE2*/', open('page2.js', encoding='utf-8').read().replace('__FDB_PAGE__', js_str('fontdb_page.html')).replace('__GUIDE__', js_str('guide.html')))
+s = s.replace('/*CORE*/', open('core.js', encoding='utf-8').read() + '\n' + open('core2.js', encoding='utf-8').read() + '\n' + open('dict.js', encoding='utf-8').read() + '\n' + open('dict2.js', encoding='utf-8').read() + '\n' + open('mt.js', encoding='utf-8').read() + '\n' + open('fr8x8.js', encoding='utf-8').read() + '\n' + open('fontdb.js', encoding='utf-8').read())
 for k in ('LOGO', 'BANNER'):
     s = s.replace('__%s__' % k, img[k])
 ort = open('ortpk2/package/dist/ort.wasm.bundle.min.mjs', encoding='utf-8').read()
