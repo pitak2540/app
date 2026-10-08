@@ -67,6 +67,8 @@ h2{font:700 18px var(--display);margin:0;color:var(--cyan)}
 .pager{display:flex;gap:10px;align-items:center;justify-content:center;padding-top:8px;font-family:var(--mono);font-size:13px}
 
 textarea.tbl{font:13px/1.5 var(--mono);width:100%;height:320px}
+table.ana{border-collapse:collapse;width:100%;font-size:13px}table.ana th,table.ana td{border-bottom:1px solid rgba(255,255,255,.08);padding:4px 6px;text-align:left;vertical-align:top}table.ana td.t{word-break:break-all;max-width:420px}
+.guide h2{margin-top:22px}.guide h3{margin-top:16px}.guide table{border-collapse:collapse}.guide td,.guide th{border-bottom:1px solid rgba(255,255,255,.1);padding:4px 8px;text-align:left;vertical-align:top}.guide pre{background:rgba(0,0,0,.3);padding:8px;border-radius:8px;overflow:auto}
 .scroll{overflow-x:auto;max-width:100%}
 canvas{display:block;image-rendering:pixelated}
 #tileCv,#glyphCv{background:#05040F;border:1px solid var(--line);cursor:crosshair}
@@ -129,6 +131,8 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
     <button role="tab" data-t="patch" aria-selected="false">แพตช์</button>
     <button role="tab" data-t="title" aria-selected="false">เครดิตในเกม</button>
     <button role="tab" data-t="cover" aria-selected="false">ปกเกม</button>
+    <button role="tab" data-t="fontdb" aria-selected="false">คลังฟอนต์</button>
+    <button role="tab" data-t="guide" aria-selected="false">คู่มือ</button>
   </nav>
 
   <!-- ข้อความ -->
@@ -138,7 +142,11 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
       <div class="row">
         <label class="f">ภาษาต้นฉบับในเกม<select id="scSrc" style="max-width:260px"><option value="">อังกฤษ / ตามตารางอักษร</option><option value="shift_jis">ญี่ปุ่น (Shift-JIS)</option><option value="euc-jp">ญี่ปุ่น (EUC-JP)</option><option value="gbk">จีนตัวย่อ (GBK)</option><option value="big5">จีนตัวเต็ม (Big5)</option><option value="euc-kr">เกาหลี (EUC-KR)</option><option value="windows-1252">ยุโรปตะวันตก: ฝรั่งเศส เยอรมัน สเปน อิตาลี โปรตุเกส (Windows-1252)</option><option value="windows-1250">ยุโรปกลาง: โปแลนด์ เช็ก ฮังการี (Windows-1250)</option><option value="windows-1251">รัสเซีย (Windows-1251)</option><option value="windows-1253">กรีก (Windows-1253)</option><option value="windows-1254">ตุรกี (Windows-1254)</option><option value="windows-1258">เวียดนาม (Windows-1258)</option><option value="windows-1256">อาหรับ (Windows-1256)</option><option value="windows-874">ไทย (Windows-874 / TIS-620)</option></select></label>
         <label class="f">ยาวอย่างน้อย (ไบต์)<input type="number" id="scMin" value="4" min="2" max="64"></label>
-        <label class="f">ไบต์ปิดข้อความ (hex)<input type="text" class="hx" id="scTerm" value="00" maxlength="2"></label>
+        <label class="f">ไบต์ปิดข้อความ (hex ใส่หลายตัวได้ เว้นว่าง = เดาให้)<input type="text" class="hx" id="scTerm" value="00" style="width:90px"></label>
+        <label class="f">รหัสคำสั่งในข้อความ (ไบต์ติดกันสูงสุด)<input type="number" id="scCtl" value="0" min="0" max="8" title="ไบต์ที่ไม่อยู่ในตาราง เช่น ขึ้นบรรทัด ชื่อผู้เล่น จะแสดงเป็น <XX> และต้องคงไว้ในคำแปล"></label>
+        <label class="f">ชนิดพอยน์เตอร์<select id="scPtrKind"><option value="auto">อัตโนมัติตามระบบ</option><option value="gba">GBA 4 ไบต์ (08xxxxxx)</option><option value="gb">GB/GBC 2 ไบต์ ในแบงก์เดียวกัน</option><option value="gbfar">GB/GBC 2 ไบต์ + เลขแบงก์ (โปเกมอน text_far)</option><option value="nes">NES 2 ไบต์ ในแบงก์เดียวกัน</option><option value="snes-lo">SNES LoROM 3 ไบต์</option><option value="snes-hi">SNES HiROM 3 ไบต์</option><option value="snes-lo2">SNES LoROM 2 ไบต์ ในแบงก์เดียวกัน</option><option value="custom">กำหนดเอง</option><option value="none">ไม่ย้าย (เขียนทับที่เดิมอย่างเดียว)</option></select></label>
+        <span id="scNesBox" hidden><label class="f">แบงก์ NES<select id="scNesBank"><option value="16384">16 KB</option><option value="8192">8 KB</option><option value="32768">32 KB</option></select></label><label class="f">ที่อยู่เริ่ม (hex)<input type="text" class="hx" id="scNesBase" value="8000" style="width:70px"></label></span>
+        <span id="scCusBox" hidden><label class="f">จำนวนไบต์<select id="scCusN"><option>2</option><option>3</option><option selected>4</option></select></label><label class="f">บวกเพิ่ม (hex)<input type="text" class="hx" id="scCusBase" value="0" style="width:90px"></label><label class="c"><input type="checkbox" id="scCusBig"> big-endian</label></span>
         <label class="f">สัดส่วนตัวอักษรขั้นต่ำ<select id="scRatio"><option value="0.5">50% (ได้เยอะ มีขยะปน)</option><option value="0.7" selected>70%</option><option value="0.85">85% (เข้มงวด)</option></select></label>
         <label class="c"><input type="checkbox" id="scAscii" checked> สแกนเฉพาะอักษรอังกฤษ</label>
         <label class="c"><input type="checkbox" id="scPtr" checked> เฉพาะที่มีพอยน์เตอร์ชี้</label>
@@ -255,6 +263,17 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
       </div>
     </div>
     <div class="box">
+      <h2>สร้างตารางอักษรไทยจากเกมที่แปลแล้ว</h2>
+      <p class="hint">เล่นเกมที่แปลแล้วในอีมู แล้วพิมพ์ประโยคไทยที่เห็นบนจอให้ตรงทุกตัว (รวมช่องว่าง) เช่น ปาร์คเกอร์ ฉันมีพิซซ่า 5 ที่ โปรแกรมจะหาว่าไบต์ไหนคือตัวไหนจากรูปแบบตัวซ้ำ ค้นในส่วนที่แพตช์แก้ (ถ้าวิเคราะห์แพตช์ไว้) หรือทั้งรอม ถ้าเกมใช้รหัสไทยมาตรฐานจะเติมให้ครบทั้งชุดได้ในคลิกเดียว</p>
+      <div class="row">
+        <input type="text" id="pairText" placeholder="ประโยคไทยที่เห็นในเกม อย่างน้อย 5 ตัว" style="flex:1 1 260px">
+        <label class="c"><input type="checkbox" id="pairAll"> ค้นทั้งรอม</label>
+        <button class="btn" id="btnPair">จับคู่</button>
+      </div>
+      <div class="msg" id="pairMsg"></div>
+      <div id="pairRes"></div>
+    </div>
+    <div class="box">
       <h2>Pokemon FireRed: ช่องฟอนต์ไทย 8x8</h2>
       <p class="hint">สำหรับ Pokemon FireRed (รหัส BPRE) และแฮ็กที่ทำจาก FireRed US 1.0 เช่น Ultra Violet ปุ่มนี้จะแก้โค้ดแสดงข้อความของเกมให้มีช่องฟอนต์ 8x8 เพิ่ม 176 ช่อง (รหัส <span class="mono">F9 20</span>–<span class="mono">F9 CF</span>) พร้อมฟอนต์ไทยที่วาดไว้แล้ว สระและวรรณยุกต์ซ้อนบนพยัญชนะได้ ใช้ได้ทั้งบทพูดและเมนู แล้วโหลดตารางอักษรอังกฤษของเกมกับภาษาไทยให้ ตั้งไบต์ปิดข้อความเป็น FF และแกะข้อความใหม่ให้ทันที</p>
       <p class="hint">ตัวไทย 1 ตัวใช้ 2 ไบต์ คำแปลส่วนใหญ่จะยาวกว่าเดิมและถูกย้ายไปที่ว่างโดยแก้พอยน์เตอร์ให้ ตารางจะเลือกรูปวรรณยุกต์ตัวสูงหรือต่ำ และรูปที่ชิดซ้ายบน ป ฝ ฟ ฬ ให้เอง ถ้ารอมมีแพตช์นี้อยู่แล้วจะโหลดแค่ตารางอักษร</p>
@@ -279,15 +298,72 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
         <label class="f">ช่องต่อแถว<input type="number" id="tvCols" value="16" min="4" max="64"></label>
         <label class="f">ขยาย<select id="tvZoom"><option>2</option><option selected>3</option><option>4</option></select></label>
         <label class="c"><input type="checkbox" id="tvLsb"> 1bpp กลับบิต</label>
-        <button class="btn sm" id="tvPrev">◀ ก่อนหน้า</button>
-        <button class="btn sm" id="tvNext">ถัดไป ▶</button>
+        <label class="f" title="ฟอนต์ 8x16 บางเกมเก็บครึ่งล่างไว้แถวถัดไป ใส่จำนวนช่องต่อแถวของแผ่นไทล์ในรอม (0 = ครึ่งบนล่างติดกัน)">ครึ่งล่างอยู่ห่าง (ช่อง)<input type="number" id="tvK" value="0" min="0" max="64" style="width:60px"></label>
+        <label class="f" title="รหัสอักษรของช่องแรกที่ตำแหน่งนี้ ใส่แล้วจะเห็นตัวอักษรจากตาราง และส่งช่องว่างไปสร้างฟอนต์ไทยได้">ช่องแรกคือรหัส (hex)<input type="text" class="hx" id="tvFirst" placeholder="เช่น 80" style="width:60px"></label>
+        <label class="c"><input type="checkbox" id="tvMark" checked> ทำเครื่องหมายช่องว่าง</label>
+      </div>
+      <div class="row">
+        <button class="btn sm" id="tvPrev">◀◀ หน้าก่อน</button>
+        <button class="btn sm" data-mv="-c">◀ 1 ช่อง</button>
+        <button class="btn sm" data-mv="-1">-1 ไบต์</button>
+        <button class="btn sm" data-mv="+1">+1 ไบต์</button>
+        <button class="btn sm" data-mv="+c">1 ช่อง ▶</button>
+        <button class="btn sm" id="tvNext">หน้าถัดไป ▶▶</button>
+        <input type="text" id="tvFind" placeholder="ค้นไบต์ hex เช่น 00 3C 42 42" style="width:200px">
+        <button class="btn sm" id="tvFindGo">ค้นหาในรอม</button>
+        <button class="btn sm" id="tvFree">ส่งช่องว่างในหน้านี้ไปสร้างฟอนต์ไทย</button>
       </div>
       <div class="scroll"><canvas id="tileCv" width="384" height="288"></canvas></div>
       <div class="msg mono" id="tvInfo">คลิกที่ช่องเพื่อดูตำแหน่ง</div>
-      <p class="hint">เลื่อนหาจนเห็นตัวอักษร A B C ของเกม ถ้าเห็นแต่จุดมั่ว ลองเปลี่ยนจำนวนสีหรือขนาดช่อง ฟอนต์ที่ถูกบีบอัด (LZ77) จะมองไม่เห็นตรงนี้และต้องแก้เฉพาะเกม</p>
+      <p class="hint">เลื่อนหาจนเห็นตัวอักษร A B C ของเกม ถ้าเห็นแต่จุดมั่ว ลองเปลี่ยนจำนวนสีหรือขนาดช่อง ฟอนต์ที่ถูกบีบอัด (LZ77) จะมองไม่เห็นตรงนี้และต้องแก้เฉพาะเกม วิธีลัด: ใน mGBA เปิด Tools &gt; Game state views &gt; View tiles คลิกตัวอักษรแล้วก๊อปไบต์มาวางในช่องค้นหา</p>
+      <div class="row">
+        <label class="f">ส่งออกเป็นรูปขยาย<select id="pngScale"><option value="1">1 เท่า</option><option value="4" selected>4 เท่า (แก้ง่าย)</option><option value="8">8 เท่า</option></select></label>
+        <button class="btn sm" id="pngOut">ส่งออกหน้านี้เป็น .png</button>
+        <button class="btn sm" id="pngIn">นำเข้า .png ที่แก้แล้ว</button><input type="file" id="filePng" accept="image/png,image/*" hidden>
+        <span class="msg" id="pngMsg"></span>
+      </div>
+      <p class="hint">แก้รูปตัวอักษรเองในโปรแกรมวาดรูป: ส่งออก แก้ด้วยสีเทาตามเดิม (ขาว = พื้น ดำ = สีเข้มสุด) แล้วนำเข้าด้วยค่าที่ตั้งไว้เหมือนตอนส่งออก</p>
     </div>
     <div class="box">
-      <h2>วาดฟอนต์ไทยลงรอม</h2>
+      <h2>สร้างฟอนต์ไทยจากคลังฟอนต์ 90S Game</h2>
+      <p class="hint">วาดตัวไทยลงช่องที่ว่างในฟอนต์ของเกม (ตั้งรูปแบบ ขนาดช่อง และตำแหน่งฟอนต์ในกล่องด้านบนก่อน) แล้วเพิ่มลงตารางอักษรให้เอง ใช้กับเกมที่ตัวอักษรกว้างเท่ากันทุกตัว ช่องละตัว</p>
+      <div class="row">
+        <label class="f">แบบ<select id="fkMode"><option value="1">ทั้งพยางค์ในช่องเดียว (รวมสระบน/ล่าง วรรณยุกต์) แนะนำ</option><option value="0">แยกตัว (สระ วรรณยุกต์ ช่องละตัว)</option></select></label>
+        <button class="btn sm" id="fkFromTh">ดึงรายการจากคำแปล</button>
+        <button class="btn sm" id="fkBasic">ใส่ชุดพื้นฐาน (ก-ฮ สระ วรรณยุกต์)</button>
+      </div>
+      <label class="f">ตัวที่จะสร้าง (คั่นด้วยช่องว่าง เรียงจากใช้บ่อยไปน้อย)<textarea id="fkList" class="tbl" style="height:70px;font-family:var(--body)"></textarea></label>
+      <div class="row">
+        <label class="f" style="flex:1 1 260px">ช่องที่จะเขียนทับ (รหัส hex เช่น C0-DF หรือ A0-B9 C0-DF)<input type="text" id="fkSlots" class="mono" style="width:100%"></label>
+        <span class="msg" id="fkCount"></span>
+      </div>
+      <div class="row">
+        <label class="f">ที่มาของรูปตัวอักษร<select id="fkSrc"><option value="set">คลังฟอนต์ 90S Game (แนะนำ)</option><option value="canvas">ฟอนต์ในเครื่อง</option></select></label>
+        <label class="f" id="fkSetBox" style="flex:1 1 300px">ชุดฟอนต์ (★ = ขนาดใกล้ช่องของเกมนี้)<select id="fkSet" style="width:100%"></select></label>
+        <label class="f" id="fkGameBox">ตั้งค่าตามเกม<select id="fkGame"></select></label>
+        <label class="f" id="fkFamBox" hidden>ฟอนต์<select id="fkFam"><option>Tahoma</option><option>Leelawadee UI</option><option>Noto Sans Thai</option><option>Garuda</option><option>Tlwg Typo</option><option value="sans-serif">ฟอนต์ระบบ</option></select></label>
+        <label class="c" id="fkBoldBox" hidden><input type="checkbox" id="fkBold" checked> ตัวหนา</label>
+        <label class="f" id="fkMethBox" hidden>วิธีย่อ<select id="fkMeth"><option value="thin">เส้นบาง 1 จุด (ตัวเล็ก)</option><option value="avg">เฉลี่ยพื้นที่ (ตัวใหญ่)</option><option value="mix">ผสม</option></select></label>
+      </div>
+      <div class="msg" id="fkSetInfo"></div>
+      <div class="row">
+        <label class="f">ความสูงตัวพยัญชนะ (จุด)<input type="number" id="fkBody" value="5" min="3" max="24" style="width:60px"></label>
+        <label class="f">ความเข้มเส้น (10-90)<input type="number" id="fkThr" value="40" min="10" max="90" style="width:60px"></label>
+        <label class="f">เลื่อนซ้าย/ขวา<input type="number" id="fkDx" value="0" min="-4" max="4" style="width:60px"></label>
+        <label class="f">ความกว้างใช้ได้<input type="number" id="fkW" value="7" min="3" max="32" style="width:60px"></label>
+        <label class="f">ยืดแนวนอน (%)<input type="number" id="fkSx" value="100" min="50" max="300" style="width:70px"></label>
+        <label class="f">เลขสีตัวอักษร<input type="text" class="hx" id="fkInk" placeholder="อัตโนมัติ" style="width:70px"></label>
+        <label class="f">เลขสีพื้น<input type="text" class="hx" id="fkBg" placeholder="อัตโนมัติ" style="width:70px"></label>
+        <label class="f">เลขสีเงา (none = ไม่มี)<input type="text" class="hx" id="fkSh" placeholder="อัตโนมัติ" style="width:70px"></label>
+      </div>
+      <div class="row"><button class="btn" id="fkPrev">ดูตัวอย่าง</button><input type="text" id="fkTest" placeholder="ลองพิมพ์ประโยค" style="flex:1 1 200px"><button class="btn sm" id="fkTestGo">แสดง</button></div>
+      <div class="scroll"><canvas id="fkCv" width="10" height="10"></canvas></div>
+      <div class="scroll"><canvas id="fkCv2" width="10" height="10"></canvas></div>
+      <div class="row"><button class="btn pri" id="fkWrite">เขียนฟอนต์ลงรอม + เพิ่มในตารางอักษร</button><button class="btn" id="fkClear">ลบฟอนต์ที่เขียนจากกล่องนี้</button></div>
+      <div class="msg" id="fkMsg"></div>
+    </div>
+    <div class="box">
+      <h2>วาดฟอนต์ไทยลงรอม (แบบง่าย: ตามตารางอักษรที่มีอยู่)</h2>
       <p class="hint">ใช้ได้กับฟอนต์ที่ไม่บีบอัดและทุกช่องขนาดเท่ากัน ใส่ตำแหน่งที่ฟอนต์เริ่ม และไบต์ของตัวอักษรตัวแรกในฟอนต์ (มักเป็น 20 คือช่องว่าง) โปรแกรมจะวาดอักษรไทยทุกตัวในตารางอักษรลงช่องของไบต์นั้น ใช้ค่าสี ขนาดช่อง จากด้านบน</p>
       <div class="row">
         <label class="f">ฟอนต์เริ่มที่ (hex)<input type="text" class="hx" id="gfBase" value="0"></label>
@@ -317,6 +393,8 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
         <div class="row">
           <label class="f">ชื่อไฟล์ผลลัพธ์<input type="text" id="bdName" style="width:min(100%,320px)"></label>
           <label class="f">ที่ว่างสำหรับข้อความที่ย้าย (hex, เว้นว่าง = หาให้เอง)<input type="text" class="hx" id="bdFree" placeholder="อัตโนมัติ"></label>
+          <label class="f">ที่ว่างคือไบต์ (GB/NES/SNES)<select id="bdFreeByte"><option value="both">00 หรือ FF</option><option value="00">00</option><option value="ff">FF</option></select></label>
+          <label class="f">ที่ว่างยาวติดกันอย่างน้อย (ไบต์)<input type="number" id="bdFreeMin" value="64" min="8" style="width:80px"></label>
         </div>
         <div class="row">
           <button class="btn pri" id="btnBps">บันทึกแพตช์ .bps</button>
@@ -333,6 +411,33 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
         <div class="row"><button class="btn pri" id="btnApply">เลือกไฟล์แพตช์แล้วแปะ</button><input type="file" id="filePatch" accept=".bps,.ips,.ppf" hidden></div>
         <div class="msg" id="apMsg"></div>
       </div>
+    </div>
+    <div class="box">
+      <h2>แตกแพตช์ที่มีอยู่ ดูว่าแก้อะไรตรงไหน</h2>
+      <p class="hint">ใช้เมื่ออยากแก้คำแปลในแพตช์ไทยที่ทำไว้แล้ว หรืออยากดูว่าแพตช์ของคนอื่นแก้อะไรบ้าง เปิดรอมต้นฉบับ (ยังไม่แพตช์) ไว้ก่อน แล้วเลือกไฟล์ .bps หรือ .ips โปรแกรมจะลงแพตช์ในหน่วยความจำและแยกส่วนที่แก้เป็น ข้อความ รูป/ฟอนต์ พอยน์เตอร์ และไม่ทราบ</p>
+      <div class="row">
+        <button class="btn pri" id="btnAna">เลือกแพตช์แล้ววิเคราะห์</button><input type="file" id="fileAna" accept=".bps,.ips" hidden>
+        <button class="btn" id="btnAnaRe">วิเคราะห์ใหม่ (หลังแก้ตาราง)</button>
+        <button class="btn" id="btnAnaUse">ใช้รอมที่ลงแพตช์นี้ทำงานต่อ</button>
+        <label class="c"><input type="checkbox" class="f0" value="text" checked> ข้อความ</label>
+        <label class="c"><input type="checkbox" class="f0" value="gfx" checked> รูป/ฟอนต์</label>
+        <label class="c"><input type="checkbox" class="f0" value="ptr" checked> พอยน์เตอร์</label>
+        <label class="c"><input type="checkbox" class="f0" value="unk" checked> ไม่ทราบ</label>
+      </div>
+      <div class="msg" id="anaMsg"></div>
+      <div class="scroll" style="max-height:420px"><table class="ana" id="anaTb"><thead><tr><th>#</th><th>ตำแหน่ง</th><th>ขนาด</th><th>น่าจะเป็น</th><th>ตัวอย่าง (หลังแพตช์)</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="msg" id="anaInfo" hidden></div>
+      <p class="hint">ถ้าช่วง "ไม่ทราบ" เยอะ แปลว่าตารางอักษรยังอ่านตัวไทยไม่ออก ไปที่แท็บตารางอักษร กล่อง "สร้างตารางอักษรไทยจากเกมที่แปลแล้ว" แล้วกลับมากดวิเคราะห์ใหม่ ถ้าจะแก้คำแปลเดิม กด "ใช้รอมที่ลงแพตช์นี้ทำงานต่อ" แล้วแกะข้อความ (แพตช์ใหม่จะเทียบกับรอมที่ลงแพตช์แล้ว ให้แจกคู่กับแพตช์เดิม หรือรวมด้วยการสร้างแพตช์จากสองไฟล์ด้านล่าง)</p>
+    </div>
+    <div class="box">
+      <h2>สร้างแพตช์ .bps จากสองไฟล์</h2>
+      <p class="hint">เลือกรอมต้นฉบับ และรอมที่แก้แล้ว (เช่น แก้ด้วยโปรแกรมอื่น หรือรวมแพตช์หลายรอบ) โปรแกรมจะสร้างไฟล์ .bps ที่แปะกับรอมต้นฉบับแล้วได้รอมที่แก้แล้ว</p>
+      <div class="row">
+        <button class="btn" id="btnBpsA">1. เลือกรอมต้นฉบับ</button><input type="file" id="fileBpsA" hidden>
+        <button class="btn" id="btnBpsB">2. เลือกรอมที่แก้แล้ว</button><input type="file" id="fileBpsB" hidden>
+        <button class="btn pri" id="btnBps2">สร้างแพตช์</button>
+      </div>
+      <div class="msg" id="bps2Msg"></div>
     </div>
   </section>
 
@@ -413,6 +518,20 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
     </div>
   </section>
 
+  <!-- คลังฟอนต์ -->
+  <section class="tab" id="tab-fontdb" hidden>
+    <div class="box">
+      <h2>คลังฟอนต์ไทย 90S Game</h2>
+      <p class="hint">ฟอนต์พิกเซลไทยทุกชุดที่เพจเคยใช้ในเกมที่แปลแล้ว ดูหน้าตา ลองพิมพ์ประโยคเทียบทุกชุด และส่งออกไทล์ .png / .bin กับ .tbl ไปใช้กับเกมใหม่ ชุดเดียวกันนี้เลือกใช้ได้ในแท็บฟอนต์ กล่อง "สร้างฟอนต์ไทยจากคลังฟอนต์"</p>
+      <iframe id="fdbFrame" title="คลังฟอนต์ไทย" style="width:100%;height:80vh;border:0;border-radius:10px;background:#0f1022"></iframe>
+    </div>
+  </section>
+
+  <!-- คู่มือ -->
+  <section class="tab" id="tab-guide" hidden>
+    <div class="box guide" id="guideBox"></div>
+  </section>
+
   <footer>90S Thai ROM Studio · เครื่องมือของเพจ 90S Game · รองรับรอมของเครื่องเล่น R36S: GBA, PS1, DS, N64, Famicom, Super Famicom, Game Boy, Mega Drive, อาร์เคด และอื่น ๆ</footer>
 </div>
 <div id="toast" hidden role="status"></div>
@@ -473,7 +592,7 @@ function setRom(u8, name, demo, swap){
   const nm=document.createElement('span'); nm.className='name'; nm.textContent=(S.disc?S.disc.file.name+' › ':'')+name+' '; if(demo){ const t=document.createElement('span'); t.className='tag'; t.textContent='รอมตัวอย่าง ไม่ใช่เกมจริง'; nm.appendChild(t); } ri.appendChild(nm);
   add('ระบบ',sys.label); add('CRC32',hex(S.crc,8)); add('ขนาด',fmtSize(u8.length)); if(sys.title) add('ชื่อในรอม',sys.title); if(sys.code) add('รหัส',sys.code);
   $('sysNote').textContent=sys.note; $('sysNote').hidden=!sys.note;
-  $('scPtr').disabled=!sys.ptr; $('scPtr').checked=!!sys.ptr;
+  $('scPtr').disabled=!sys.ptr; $('scPtr').checked=!!sys.ptr; $('scPtrKind').value='auto'; ptrUI(); S.ana=null; S.anaWork=false; S.tvSel=null; $('anaMsg').textContent=''; $('anaTb').tBodies[0].innerHTML='';
   $('bdName').value=(S.disc?discBase():baseName())+' Thai (90S Game)';
   $('cvTitle').value=demo?'ชื่อเกมภาษาไทย':(sys.title||(S.disc?discBase():baseName()));
   const zip=S.disc&&S.disc.kind==='zip'; $('btnBps').hidden=!!S.disc&&!zip; $('btnPpf').hidden=!S.disc||zip; $('btnImg').hidden=!S.disc; $('btnImg').textContent=zip?'บันทึก .zip เกมที่แก้แล้ว':'บันทึกอิมเมจแผ่นภาษาไทย'; $('btnGba').textContent=S.disc?'บันทึกไฟล์ที่แก้แล้ว':'บันทึกรอมภาษาไทย';
@@ -594,11 +713,12 @@ $('btnMemClear').onclick=()=>{ G.mem.clear(); memShow(); renderText(); }; memSho
 function srcTable(){ const v=$('scSrc').value; if(!v) return S.table; if(!S.jp||S.jp.enc!==v) S.jp={enc:v,table:RS.makeTable(RS.jpPairs(v))}; return S.jp.table; }
 $('scSrc').onchange=()=>{ $('scAscii').disabled=!!$('scSrc').value; doScan(false); };
 function doScan(quiet){
-  const term=parseHex($('scTerm').value); if(isNaN(term)||term>255){ toast('ไบต์ปิดข้อความต้องเป็น hex 2 หลัก เช่น 00 หรือ FF'); return; }
-  S.term=term;
+  if(!$('scTerm').value.trim()&&S.orig){ const g=guessTerms(S.orig,S.table); if(g.length){ $('scTerm').value=hex(g[0][0]); if(!quiet) toast('เดาไบต์ปิดข้อความเป็น '+hex(g[0][0])+(g.length>1?' (ตัวเลือกรอง '+g.slice(1).map(x=>hex(x[0])).join(' ')+')':''),7000); } }
+  const terms=$('scTerm').value.trim().split(/[\s,]+/).map(parseHex); if(!terms.length||terms.some(t=>isNaN(t)||t>255)){ toast('ไบต์ปิดข้อความต้องเป็น hex 2 หลัก เช่น 00 หรือ FF ใส่หลายตัวได้ เช่น 50 57'); return; }
+  const term=terms[0]; S.term=term; S.terms=terms;
   const old=new Map(S.entries.filter(e=>e.thai).map(e=>[e.off,e.thai]));
   const src=$('scSrc').value, jp=!!src, wide=/^(shift_jis|euc-jp|gbk|big5|euc-kr)$/.test(src);
-  const r=RS.scan(S.orig,{table:srcTable(),multi:wide,needKana:src==='shift_jis'||src==='euc-jp',minWide:wide&&!/jp|jis/.test(src)?3:0,ptr:S.sys.ptr,term,minLen:+$('scMin').value||4,minRatio:+$('scRatio').value,asciiOnly:!jp&&$('scAscii').checked,needPtr:$('scPtr').checked});
+  const r=RS.scan(S.orig,{table:srcTable(),multi:wide,needKana:src==='shift_jis'||src==='euc-jp',minWide:wide&&!/jp|jis/.test(src)?3:0,ptr:scanPtr(),term,terms,ctl:+$('scCtl').value||0,minLen:+$('scMin').value||4,minRatio:+$('scRatio').value,asciiOnly:!jp&&$('scAscii').checked,needPtr:$('scPtr').checked});
   for(const e of r.entries) if(old.has(e.off)) e.thai=old.get(e.off);
   let hid=0; if(!jp&&$('scJunk').checked&&!$('scPtr').checked&&typeof looksEnglish==='function'){ const keep=r.entries.filter(e=>e.thai||looksEnglish(e.text)); hid=r.entries.length-keep.length; r.entries=keep; }
   S.hidden=hid; S.entries=r.entries; S.page=0; renderText();
@@ -786,8 +906,14 @@ const TMAX={'1':1,'2n':3,'2g':3,'4':15,'4l':15,'8':255};
 function tv(){ const mode=$('tvBpp').value; let w=+$('tvW').value||8, h=+$('tvH').value||8;
   if(mode!=='1'&&mode!=='4l'){ w=Math.max(8,Math.round(w/8)*8); h=Math.max(8,Math.round(h/8)*8); } if(mode==='4l') w+=w&1;
   const bytes=mode==='1'?Math.ceil(w/8)*h:mode==='8'?w*h:(mode==='4'||mode==='4l')?w*h/2:w*h/4;
-  return {mode,max:TMAX[mode],w,h,cols:+$('tvCols').value||16,zoom:+$('tvZoom').value,lsb:$('tvLsb').checked,off:parseHex($('tvOff').value)||0,bytes,rows:Math.max(4,Math.floor(128/h))}; }
-function cellAt(p,x,y){ const t=(y>>3)*(p.w>>3)+(x>>3), yy=y&7, xx=x&7, bit=7-xx;
+  const tiled=mode!=='4l'&&(mode!=='1'||w===8), tb=mode==='1'?8:mode==='8'?64:mode==='4'?32:16, k=tiled&&h>8?Math.max(0,+$('tvK').value|0):0;
+  return {mode,max:TMAX[mode],w,h,cols:+$('tvCols').value||16,zoom:+$('tvZoom').value,lsb:$('tvLsb').checked,off:parseHex($('tvOff').value)||0,bytes,rows:Math.max(4,Math.floor(128/h)),k,tb,first:parseHex($('tvFirst').value)}; }
+/* ตำแหน่งเริ่มของช่องที่ n: ปกติช่องเรียงติดกัน, ถ้า k>0 = ไทล์เรียงเป็นแผ่นกว้าง k ช่อง (ส่วนล่างของตัวอักษรอยู่แถวถัดไป) */
+function cellOff(p,n){ if(!p.k) return p.off+n*p.bytes; const tw=p.w>>3, th=p.h>>3; return p.off+((Math.floor(n/p.k)*th)*p.k*tw+(n%p.k)*tw)*p.tb; }
+function cellPatches(px,p,n){ const o=cellOff(p,n); if(!p.k) return [{off:o,bytes:putCell(px,p)}];
+  const flat=putCell(px,Object.assign({},p,{k:0})), tw=p.w>>3, th=p.h>>3, out=[];
+  for(let ty=0;ty<th;ty++) for(let tx=0;tx<tw;tx++){ const t=ty*tw+tx; out.push({off:o+(ty*p.k*tw+tx)*p.tb,bytes:flat.slice(t*p.tb,(t+1)*p.tb)}); } return out; }
+function cellAt(p,x,y){ const t=p.k?(y>>3)*p.k*(p.w>>3)+(x>>3):(y>>3)*(p.w>>3)+(x>>3), yy=y&7, xx=x&7, bit=7-xx;
   switch(p.mode){ case '1': return [y*Math.ceil(p.w/8)+(x>>3), p.lsb?xx:bit];
     case '2n': return [t*16+yy, bit, t*16+8+yy]; case '2g': return [t*16+yy*2, bit, t*16+yy*2+1];
     case '4': return [t*32+yy*4+(xx>>1), (x&1)*4]; case '4l': return [y*(p.w>>1)+(x>>1), (x&1)*4]; default: return [t*64+yy*8+xx, 0]; } }
@@ -804,12 +930,17 @@ function paint(cv,cells,p,cols,zoom){ const rows=Math.ceil(cells.length/cols)||1
   const c=off.getContext('2d'), im=c.createImageData(W,H);
   cells.forEach((px,i)=>{ const cx=(i%cols)*p.w, cy=Math.floor(i/cols)*p.h; for(let y=0;y<p.h;y++) for(let x=0;x<p.w;x++){ const s=shade(px[y*p.w+x],p.max), o=((cy+y)*W+cx+x)*4; im.data[o]=s[0]; im.data[o+1]=s[1]; im.data[o+2]=s[2]; im.data[o+3]=255; } });
   c.putImageData(im,0,0); cv.width=W*zoom; cv.height=H*zoom; const g=cv.getContext('2d'); g.imageSmoothingEnabled=false; g.drawImage(off,0,0,W*zoom,H*zoom); }
-function drawTiles(){ if(!S.orig) return; const p=tv(), rom=workRom(), cells=[]; for(let i=0;i<p.cols*p.rows;i++){ const o=p.off+i*p.bytes; if(o+p.bytes>rom.length) break; cells.push(getCell(rom,o,p)); } paint($('tileCv'),cells,p,p.cols,p.zoom); }
-['tvOff','tvBpp','tvW','tvH','tvCols','tvZoom','tvLsb'].forEach(id=>$(id).addEventListener('change',()=>{ drawTiles(); drawGlyphs(); }));
-const tvStep=d=>{ const p=tv(); let o=p.off+d*p.cols*p.rows*p.bytes; o=Math.max(0,Math.min(o,S.orig.length-p.bytes)); $('tvOff').value=hex(o,6); drawTiles(); };
+function drawTiles(){ if(!S.orig) return; const p=tv(), rom=workRom(), cells=[]; for(let i=0;i<p.cols*p.rows;i++){ const o=cellOff(p,i); if(o+p.bytes>rom.length) break; cells.push(getCell(rom,o,p)); } paint($('tileCv'),cells,p,p.cols,p.zoom);
+  S.tvBlank=[]; const g=$('tileCv').getContext('2d'), z=p.zoom; cells.forEach((px,i)=>{ if(px.every(v=>v===px[0])) S.tvBlank.push(i); });
+  const box=(i,col)=>{ g.strokeStyle=col; g.lineWidth=2; g.strokeRect((i%p.cols)*p.w*z+1,Math.floor(i/p.cols)*p.h*z+1,p.w*z-2,p.h*z-2); };
+  if($('tvMark').checked) S.tvBlank.forEach(i=>box(i,'rgba(46,204,113,.9)')); if(S.tvSel!=null&&S.tvSel<cells.length) box(S.tvSel,'#29d8f0');
+  if(!isNaN(p.first)&&z>=3){ g.font=Math.max(9,z*3)+'px sans-serif'; g.textBaseline='bottom'; g.fillStyle='rgba(255,46,136,.95)';
+    cells.forEach((px,i)=>{ const code=p.first+i; if(code>255) return; const ch=S.table.dec1[code]; if(ch&&ch.trim()) g.fillText(ch,(i%p.cols)*p.w*z+2,(Math.floor(i/p.cols)+1)*p.h*z-1); }); } }
+['tvOff','tvBpp','tvW','tvH','tvCols','tvZoom','tvLsb','tvK','tvFirst','tvMark'].forEach(id=>$(id).addEventListener('change',()=>{ S.tvSel=null; drawTiles(); drawGlyphs(); }));
+const tvStep=d=>{ const p=tv(); let o=p.off+d*(cellOff(p,p.cols*p.rows)-p.off); o=Math.max(0,Math.min(o,S.orig.length-p.bytes)); $('tvOff').value=hex(o,6); drawTiles(); };
 $('tvPrev').onclick=()=>tvStep(-1); $('tvNext').onclick=()=>tvStep(1);
-$('tileCv').onclick=ev=>{ const p=tv(), r=$('tileCv').getBoundingClientRect(), k=Math.floor((ev.clientY-r.top)/(p.h*p.zoom))*p.cols+Math.floor((ev.clientX-r.left)/(p.w*p.zoom)), o=p.off+k*p.bytes;
-  $('tvInfo').textContent='ช่องที่ '+k+' · ตำแหน่ง 0x'+hex(o,6)+' · ช่องละ '+p.bytes+' ไบต์'; };
+$('tileCv').onclick=ev=>{ const p=tv(), r=$('tileCv').getBoundingClientRect(), sx=$('tileCv').width/r.width, k=Math.floor((ev.clientY-r.top)*sx/(p.h*p.zoom))*p.cols+Math.floor((ev.clientX-r.left)*sx/(p.w*p.zoom)), o=cellOff(p,k);
+  S.tvSel=k; drawTiles(); tvInfo(p,k,o); };
 function thaiChars(){ return S.table.pairs.filter(([b,s])=>b.length===1 && /^[฀-๿]$/.test(s)); }
 function glyph(ch,p){ const c=document.createElement('canvas'); c.width=p.w; c.height=p.h; const g=c.getContext('2d',{willReadFrequently:true});
   g.font=($('gfBold').checked?'bold ':'')+(+$('gfPx').value||8)+'px '+$('gfFam').value; g.fillStyle='#fff'; g.textBaseline='alphabetic';
@@ -819,7 +950,7 @@ function drawGlyphs(){ const p=tv(), cells=thaiChars().map(([,s])=>glyph(s,p)); 
 ['gfFam','gfPx','gfY','gfFg','gfBg','gfBold'].forEach(id=>$(id).addEventListener('input',drawGlyphs));
 $('btnGfWrite').onclick=()=>{ const p=tv(), base=parseHex($('gfBase').value), first=parseHex($('gfFirst').value), msg=$('gfMsg');
   if(isNaN(base)||isNaN(first)){ msg.className='msg bad'; msg.textContent='ใส่ตำแหน่งฟอนต์และไบต์ตัวแรกเป็นเลข hex'; return; }
-  const add=[]; let skip=0; for(const [b,s] of thaiChars()){ const o=base+(b[0]-first)*p.bytes; if(b[0]<first||o+p.bytes>S.orig.length){ skip++; continue; } add.push({off:o,bytes:putCell(glyph(s,p),p),font:true}); }
+  const add=[]; let skip=0; const pb=Object.assign({},p,{off:base}); for(const [b,s] of thaiChars()){ const o=cellOff(pb,b[0]-first); if(b[0]<first||o+p.bytes>S.orig.length){ skip++; continue; } for(const x of cellPatches(glyph(s,p),pb,b[0]-first)) add.push(Object.assign(x,{font:true})); }
   S.patches=S.patches.filter(x=>!x.font).concat(add); S.work=null; drawTiles();
   msg.className='msg '+(add.length?'ok':'bad'); msg.textContent=add.length?('เขียนอักษรไทย '+add.length+' ตัว ตั้งแต่ 0x'+hex(add[0].off,6)+(skip?' · ข้าม '+skip+' ตัวที่อยู่นอกขอบเขต':'')+' ดูผลในช่องด้านบนได้'):'ไม่มีตัวอักษรไหนลงได้ ตรวจตำแหน่งฟอนต์'; if(add.length){ $('tvOff').value=hex(add[0].off,6); drawTiles(); } };
 $('btnGfClear').onclick=()=>{ S.patches=S.patches.filter(x=>!x.font); S.work=null; drawTiles(); $('gfMsg').className='msg'; $('gfMsg').textContent='ลบฟอนต์ไทยที่เขียนไว้แล้ว'; };
@@ -838,11 +969,12 @@ $('btnFr8Off').onclick=()=>{ S.patches=S.patches.filter(p=>!p.fr8); S.work=null;
 
 /* ---------- แพตช์ ---------- */
 function doBuild(){ const f=$('bdFree').value.trim(), free=f?parseHex(f):null; if(f&&isNaN(free)) throw new Error('ตำแหน่งที่ว่างต้องเป็นเลข hex');
-  return RS.build(S.orig,S.entries,S.table,{term:S.term,patches:S.patches,freeOff:free,ptr:S.sys.ptr,maxSize:S.sys.maxSize,fix:S.sys.fix,blobs:S.gfx}); }
+  return RS.build(S.orig,S.entries,S.table,{term:S.term,patches:S.patches,freeOff:free,ptr:scanPtr(),freeByte:$('bdFreeByte').value,freeMin:+$('bdFreeMin').value||32,maxSize:S.sys.maxSize,fix:S.sys.fix,blobs:S.gfx}); }
 function renderBuild(){ const el=$('bdReport'); try{ const r=doBuild(), s=r.stats, n=s.inplace+s.moved, fonts=S.patches.filter(p=>p.font).length;
     let h='<ul class="list"><li>ใส่คำแปลได้ <b>'+n+'</b> ข้อความ (ลงที่เดิม '+s.inplace+' · ย้ายที่ '+s.moved+' แก้พอยน์เตอร์ '+s.ptrs+' จุด)</li>';
     if(fonts) h+='<li>ฟอนต์ไทย '+fonts+' ตัวอักษร</li>'; const f8=S.patches.find(p=>p.fr8&&p.bytes.length>0x1000); if(f8) h+='<li>แพตช์ช่องฟอนต์ไทย 8x8 (FireRed) ที่ <span class="mono">0x'+hex(f8.off,6)+'</span></li>'; if(s.gfx) h+='<li>เครดิตในเกม '+s.gfx+' ภาพ'+(s.gfxMoved?' (ย้ายที่ '+s.gfxMoved+')':'')+'</li>';
     if(r.freeStart!=null) h+='<li>ข้อมูลที่ย้ายอยู่ที่ <span class="mono">0x'+hex(r.freeStart,6)+'–0x'+hex(r.freeEnd,6)+'</span>'+(r.expanded?' · ขยายรอมเป็น '+(r.rom.length/1048576).toFixed(2)+' MB':'')+'</li>';
+    if(s.noroom) h+='<li style="color:var(--bad)">ย้าย '+s.noroom+' ข้อความไม่ได้ เพราะที่ว่างในแบงก์เดียวกันไม่พอ ลองลด "ที่ว่างยาวติดกันอย่างน้อย" หรือย่อคำแปล</li>';
     if(s.toolong+s.badchar) h+='<li style="color:var(--bad)">ข้าม '+(s.toolong+s.badchar)+' ข้อความที่มีปัญหา (ดูได้ที่แท็บข้อความ ตัวกรอง "มีปัญหา")</li>';
     h+='</ul>'; if(!n&&!fonts&&!s.gfx&&!f8) h='<p class="hint">ยังไม่มีคำแปล ไปพิมพ์คำแปลที่แท็บข้อความก่อน</p>'; el.className='msg'; el.innerHTML=h; return r;
   }catch(e){ el.className='msg bad'; el.textContent=e.message; return null; } }
@@ -964,6 +1096,7 @@ $('tabs').onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; for(
   if(b.dataset.t==='patch') renderBuild(); if(b.dataset.t==='font'){ drawTiles(); drawGlyphs(); } if(b.dataset.t==='cover') drawCover(); if(b.dataset.t==='title'){ if(!TG.scanned) tgScan(); else tgRender(); } };
 
 /* ---------- เริ่มด้วยรอมตัวอย่าง ---------- */
+/*PAGE2*/
 (function boot(){ const rom=RS.demoRom(), p={mode:'1',max:1,w:8,h:8,bytes:8,lsb:false}, c=document.createElement('canvas'); c.width=c.height=8; const g=c.getContext('2d',{willReadFrequently:true}); g.font='8px monospace'; g.fillStyle='#fff'; g.textBaseline='alphabetic';
   for(let b=0x21;b<0x7F;b++){ g.clearRect(0,0,8,8); g.fillText(String.fromCharCode(b),1,7); const d=g.getImageData(0,0,8,8).data, px=new Uint8Array(64); for(let i=0;i<64;i++) px[i]=d[i*4+3]>110?1:0; rom.set(putCell(px,p),0x4000+(b-0x20)*8); }
   { const g2={mode:'4t',w:240,h:32}, d=new Uint8Array(3840), k=document.createElement('canvas'); k.width=240; k.height=32; const q=k.getContext('2d',{willReadFrequently:true}); q.font='bold 18px sans-serif'; q.fillStyle='#fff'; q.textAlign='center'; q.fillText('THAI DEMO QUEST',120,22);
