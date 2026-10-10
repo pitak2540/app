@@ -165,73 +165,11 @@ footer{margin-top:32px;padding-top:14px;border-top:1px solid var(--line);color:v
           <button class="btn sm" id="btnFill">เติมคำแปลอัตโนมัติ (ออฟไลน์)</button>
           <button class="btn sm" id="btnDraft">แปลร่างหน้านี้ (ออฟไลน์)</button>
           <button class="btn sm pri" id="btnMt" hidden>แปลออฟไลน์ด้วยโมเดล</button>
-          <button class="btn sm pri" id="btnAi">ให้ Claude แปลหน้านี้</button>
-          <button class="btn sm" id="btnAiCfg" hidden>ตั้งค่า Claude</button>
           <button class="btn sm" id="btnGt">Google Translate</button>
           <button class="btn sm" id="btnCsvOut">ส่งออก CSV</button>
           <button class="btn sm" id="btnCsvIn">นำเข้า CSV</button>
           <input type="file" id="fileCsv" accept=".csv" hidden>
         </div>
-      </div>
-      <div class="box" id="aiBox" hidden style="margin-top:12px">
-        <h2>ตั้งค่าปุ่ม "ให้ Claude แปลหน้านี้"</h2>
-        <p class="hint">ในโปรแกรม .exe .apk และไฟล์ .html ปุ่มนี้ส่งข้อความในหน้าที่เปิดอยู่ไปให้ Claude แปลผ่านอินเทอร์เน็ต ต้องใช้ API key ของคุณเอง สร้างได้ที่ platform.claude.com มีค่าใช้จ่ายตามปริมาณที่ใช้ และคิดแยกจากแพ็กเกจสมาชิก Claude คีย์ถูกเก็บไว้ในเครื่องนี้เท่านั้น และถูกส่งไปที่ api.anthropic.com ที่เดียว</p>
-        <div class="row">
-          <label class="f" style="flex:1 1 260px">API key<input type="password" id="aiKey" placeholder="sk-ant-..." autocomplete="off"></label>
-          <label class="f">รุ่นที่ใช้แปล<select id="aiModel"><option value="claude-haiku-4-5-20251001">Haiku 4.5 (เร็ว ราคาถูก)</option><option value="claude-sonnet-5-5">Sonnet 5.5 (สมดุล)</option><option value="claude-opus-5-5">Opus 5.5 (ละเอียดที่สุด)</option></select></label>
-          <button class="btn pri" id="btnAiSave">บันทึก</button>
-          <button class="btn" id="btnAiDel">ลบคีย์ออกจากเครื่อง</button>
-        </div>
-        <div class="msg" id="aiMsg"></div>
-      </div>
-      <div class="box" id="mtBox" hidden style="margin-top:12px">
-        <h2>แปลออฟไลน์ด้วยโมเดล (อังกฤษเป็นไทย)</h2>
-        <p class="hint">แปลทั้งประโยคในเครื่องนี้โดยไม่ใช้อินเทอร์เน็ต ครั้งแรกให้กด "เลือกไฟล์โมเดล" แล้วเลือกไฟล์ทั้งหมดในโฟลเดอร์ <span class="mono">model-en-th</span> (กด Ctrl+A ในหน้าต่างเลือกไฟล์) โปรแกรมจะจำโมเดลไว้ในเครื่อง ครั้งต่อไปกดปุ่มแปลได้เลย ใช้หน่วยความจำประมาณ 500 MB</p>
-        <div class="row"><button class="btn pri" id="mtPick">เลือกไฟล์โมเดล</button><input type="file" id="fileMt" multiple hidden><button class="btn" id="mtForget">ลืมโมเดลที่จำไว้</button><button class="btn" id="mtClose">ปิด</button><span class="msg" id="mtMsg"></span></div>
-        <p class="hint">โมเดล QuickMT en-th (quickmt/quickmt-en-th) สัญญาอนุญาต CC BY 4.0 แปลงเป็น ONNX โดย KaoJai.ai</p>
-      </div>
-      <div class="box" id="gtBox" hidden style="margin-top:12px">
-        <h2>แปลหน้านี้ด้วย Google Translate (ต้องต่ออินเทอร์เน็ต)</h2>
-        <p class="hint"><b>แบบฟรี:</b> กดลิงก์ด้านล่างเพื่อเปิด Google Translate พร้อมข้อความที่ยังไม่แปลในหน้านี้ คัดลอกคำแปลทั้งหมดกลับมาวางในช่อง แล้วกด "ใส่คำแปลที่วาง" ข้อความหนึ่งรายการคือหนึ่งบรรทัด เครื่องหมาย ¶ แทนการขึ้นบรรทัดใหม่ในเกม อย่าลบออก</p>
-        <div class="row"><a class="btn pri" id="gtLink" href="https://translate.google.com/" target="_blank" rel="noopener">เปิด Google Translate</a><button class="btn" id="gtCopy">คัดลอกข้อความต้นฉบับ</button><span class="msg" id="gtInfo"></span></div>
-        <textarea id="gtPaste" class="tbl" style="height:140px;font-family:var(--body)" placeholder="วางคำแปลจาก Google Translate ที่นี่"></textarea>
-        <div class="row"><button class="btn pri" id="gtApply">ใส่คำแปลที่วาง</button><button class="btn" id="gtClose">ปิด</button><span class="msg" id="gtMsg"></span></div>
-        <p class="hint"><b>แบบอัตโนมัติ:</b> ถ้ามี API key ของ Google Cloud Translation ใส่ไว้ที่นี่ ปุ่ม Google Translate จะแปลและเติมให้เองโดยไม่ต้องคัดลอกวาง Google คิดค่าบริการตามจำนวนตัวอักษร คีย์ถูกเก็บในเครื่องนี้เท่านั้น</p>
-        <div class="row"><label class="f" style="flex:1 1 260px">Google API key (ไม่บังคับ)<input type="password" id="gtKey" autocomplete="off"></label><button class="btn" id="gtSave">บันทึกคีย์</button><button class="btn" id="gtAuto">แปลอัตโนมัติด้วยคีย์นี้</button></div>
-      </div>
-      <div id="txList" style="margin-top:12px"></div>
-      <div class="pager" id="txPager"></div>
-    </div>
-  </section>
-
-  <!-- พจนานุกรม -->
-  <section class="tab" id="tab-dict" hidden>
-    <div class="cols">
-      <div class="box">
-        <h2>พจนานุกรมของคุณ</h2>
-        <p class="hint">บรรทัดละคู่ <span class="mono">คำต้นฉบับ=คำแปล</span> ใช้ได้กับทุกภาษา เช่นชื่อตัวละคร ชื่อท่า ศัพท์เฉพาะของเกม โปรแกรมใช้คำเหล่านี้เติมคำแปลและแสดงคำแนะนำใต้แต่ละข้อความ โดยไม่ต้องต่ออินเทอร์เน็ต</p>
-        <textarea class="tbl" id="glText" spellcheck="false" placeholder="Luffy=ลูฟี่&#10;Gum-Gum Pistol=หมัดยางยืด&#10;ルフィ=ลูฟี่"></textarea>
-        <label class="c"><input type="checkbox" id="glBuiltin" checked> <span id="glBuiltinLabel">ใช้พจนานุกรมศัพท์เกมในตัว</span></label>
-        <div class="row">
-          <button class="btn pri" id="btnGlApply">ใช้พจนานุกรมนี้</button>
-          <button class="btn" id="btnGlOpen">เปิดไฟล์</button>
-          <button class="btn" id="btnGlSave">บันทึกไฟล์</button>
-          <input type="file" id="fileGl" accept=".txt,.csv" hidden>
-        </div>
-        <div class="msg" id="glMsg"></div>
-      </div>
-      <div class="box">
-        <h2>คำแปลจากงานเก่า</h2>
-        <p class="hint">นำเข้าไฟล์ CSV หรืองานแปล (.json) ที่เคยทำ โปรแกรมจะจำคู่ต้นฉบับกับคำแปลไว้ เมื่อเกมใหม่มีข้อความเดียวกันจะเติมให้ทันที เหมาะกับเกมภาคต่อหรือเกมจากผู้สร้างเดียวกัน</p>
-        <div class="row"><button class="btn" id="btnMemIn">นำเข้างานเก่า</button><button class="btn" id="btnMemClear">ล้างที่จำไว้</button><input type="file" id="fileMem" accept=".csv,.json" hidden></div>
-        <div class="msg" id="memMsg"></div>
-        <h2>แปลตอนออฟไลน์ทำอะไรได้บ้าง</h2>
-        <ul class="list">
-          <li>ปุ่ม "เติมคำแปลอัตโนมัติ" ในแท็บข้อความ เติมข้อความที่ตรงกับพจนานุกรม งานเก่า หรือข้อความซ้ำที่แปลไว้แล้วในเกมเดียวกัน</li>
-          <li>ปุ่ม "แปลร่างหน้านี้" แปลประโยคอังกฤษแบบคำต่อคำจากคลังคำในตัว ได้ความหมายคร่าว ๆ แต่ไม่เป็นธรรมชาติเท่า Claude ต้องอ่านและเกลาทุกข้อความ ชื่อเฉพาะที่ไม่รู้จักจะคงไว้ตามเดิม</li>
-          <li>ใต้ข้อความที่ยังไม่แปลจะมีคำศัพท์ที่พบในประโยคให้ดูประกอบ</li>
-          <li>ถ้าต้องการคำแปลที่อ่านลื่นทั้งประโยค ใช้ปุ่ม "ให้ Claude แปลหน้านี้" ซึ่งต้องต่ออินเทอร์เน็ต หรือส่งออก CSV ไปแปลแล้วนำเข้ากลับ</li>
-        </ul>
       </div>
     </div>
   </section>
@@ -547,7 +485,7 @@ $('hero').style.backgroundImage = 'url(' + BANNER + ')';
 const defaultPairs = () => RS.asciiPairs().concat(RS.thaiPairs());
 const S = { orig:null, name:'', demo:true, entries:[], table:RS.makeTable(defaultPairs()), patches:[], gfx:[], term:0, page:0, work:null, disc:null, sub:null };
 const PER = 50;
-const caps = (location.protocol !== 'file:' && window.claude && window.claude.use) ? { dl: window.claude.use('downloads'), ai: window.claude.use('sample') } : null;
+const caps = (location.protocol !== 'file:' && window.claude && window.claude.use) ? { dl: window.claude.use('downloads') } : null;
 
 let toastT; function toast(m, ms){ const t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true, ms||4500); }
 const parseHex = s => { s=String(s).trim().replace(/^0x/i,''); return /^[0-9a-f]+$/i.test(s) ? parseInt(s,16) : NaN; };
@@ -778,30 +716,6 @@ $('btnCsvIn').onclick=pick('fileCsv', async f=>{
   renderText(); toast('นำเข้าคำแปล '+n+' ข้อความ'+(n?'':' (offset ไม่ตรงกับข้อความที่แกะไว้ ตรวจว่าเปิดรอมและแกะด้วยค่าเดิม)'));
 });
 const store={get:k=>{ try{ return localStorage.getItem(k)||''; }catch(e){ return ''; } }, set:(k,v)=>{ try{ v?localStorage.setItem(k,v):localStorage.removeItem(k); }catch(e){} }};
-async function askApi(prompt){ const key=store.get('rs_key'); let res;
-  try{ res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body:JSON.stringify({model:store.get('rs_model')||'claude-haiku-4-5-20251001',max_tokens:8000,messages:[{role:'user',content:prompt}]})}); }
-  catch(e){ throw new Error('ติดต่อ Claude ไม่ได้ ตรวจว่าเครื่องต่ออินเทอร์เน็ตอยู่'); }
-  const j=await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(res.status===401?'API key ไม่ถูกต้อง กด "ตั้งค่า Claude" แล้วใส่ใหม่':res.status===429?'ใช้งานถี่เกินไปหรือเครดิตหมด รอสักครู่แล้วลองใหม่':'Claude ตอบกลับข้อผิดพลาด '+res.status+': '+((j.error&&j.error.message)||''));
-  const t=(j.content||[]).filter(c=>c.type==='text').map(c=>c.text).join(''), a=t.indexOf('['), b=t.lastIndexOf(']');
-  if(a<0||b<a) throw new Error('Claude ตอบกลับมาในรูปแบบที่อ่านไม่ได้ ลองกดใหม่'); return JSON.parse(t.slice(a,b+1)); }
-async function aiTranslate(ask){ const b=$('btnAi'), todo=(S.shown||[]).filter(e=>!e.thai).slice(0,50); if(!todo.length) return toast('หน้านี้แปลครบแล้ว ไปหน้าถัดไปแล้วกดอีกครั้ง');
-  b.disabled=true; b.textContent='กำลังแปล…';
-  try{
-    const prompt='แปลข้อความในเกมต่อไปนี้ (ต้นฉบับ: '+$('scSrc').selectedOptions[0].textContent+') เป็นภาษาไทยที่เป็นธรรมชาติและกระชับ เกมชื่อ "'+(S.sys.title||S.name)+'" ระบบ '+S.sys.label+'\nกติกา: คงจำนวนบรรทัด (\\n) เท่าเดิมเมื่อทำได้ แต่ละบรรทัดไม่ควรยาวกว่าต้นฉบับ คงแท็ก <XX> และสัญลักษณ์พิเศษท้ายข้อความ (เช่น \\ ) ไว้ตรงตำแหน่งเดิม ห้ามเพิ่มคำอธิบาย'+($('glText').value.trim()?'\nใช้คำแปลศัพท์เฉพาะตามนี้:\n'+$('glText').value.trim().slice(0,3000):'')+'\nตอบเป็น JSON array เท่านั้น รูปแบบ [{"i":0,"th":"..."}]\n\n'+JSON.stringify(todo.map((e,i)=>({i,en:e.text})));
-    const out=await ask(prompt); let n=0;
-    for(const r of (Array.isArray(out)?out:[])){ const e=todo[r.i]; if(e && typeof r.th==='string'){ e.thai=r.th; n++; } }
-    renderText(); toast('แปลให้ '+n+' ข้อความ ตรวจและแก้ได้เลย');
-  }catch(e){ toast('แปลไม่สำเร็จ: '+(e&&e.message||e),9000); }
-  b.disabled=false; b.textContent='ให้ Claude แปลหน้านี้'; }
-if(caps){ $('btnAi').hidden=true; caps.ai.then(ai=>{ if(!ai) return; $('btnAi').hidden=false; $('btnAi').onclick=()=>aiTranslate(pr=>ai.json(pr)); }); }
-else { const cfg=()=>{ $('aiBox').hidden=false; $('aiKey').value=store.get('rs_key'); $('aiModel').value=store.get('rs_model')||'claude-haiku-4-5-20251001'; $('aiBox').scrollIntoView({block:'center'}); };
-  $('btnAiCfg').hidden=false; $('btnAiCfg').onclick=cfg;
-  $('btnAi').onclick=()=>{ if(!store.get('rs_key')){ cfg(); $('aiMsg').className='msg warn'; $('aiMsg').textContent='ใส่ API key ก่อน แล้วกดปุ่มแปลอีกครั้ง'; return; } aiTranslate(askApi); };
-  $('btnAiSave').onclick=()=>{ const k=$('aiKey').value.trim(); if(!/^sk-ant-/.test(k)){ $('aiMsg').className='msg bad'; $('aiMsg').textContent='API key ต้องขึ้นต้นด้วย sk-ant-'; return; } store.set('rs_key',k); store.set('rs_model',$('aiModel').value); $('aiBox').hidden=true; toast('บันทึกแล้ว กด "ให้ Claude แปลหน้านี้" ได้เลย'); };
-  $('btnAiDel').onclick=()=>{ store.set('rs_key',''); $('aiKey').value=''; $('aiMsg').className='msg'; $('aiMsg').textContent='ลบคีย์ออกจากเครื่องนี้แล้ว'; }; }
-
 /* ---------- แปลออฟไลน์ด้วยโมเดล ---------- */
 const MT=window.RS_MT; let mtBusy=false, mtStop=false;
 const idb=(mode,fn)=>new Promise((res,rej)=>{ try{ const o=indexedDB.open('rs_mt',1); o.onupgradeneeded=()=>o.result.createObjectStore('f'); o.onerror=()=>rej(o.error); o.onsuccess=()=>{ try{ const tx=o.result.transaction('f',mode), rq=fn(tx.objectStore('f')); tx.oncomplete=()=>res(rq&&rq.result); tx.onerror=()=>rej(tx.error); tx.onabort=()=>rej(tx.error); }catch(e){ rej(e); } }; }catch(e){ rej(e); } });
